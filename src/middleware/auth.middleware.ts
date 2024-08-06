@@ -8,7 +8,11 @@ export const AuthMiddleware = async (
   try {
     const token = request.headers.authorization
 
-    const { user, ok } = await checkToken(token)
+    const { user, ok, error, message, status } = await checkToken(token)
+
+    if (!ok) return response.status(status).json({
+      status, error, message
+    })
 
     if (!user || !ok) {
       throw new Error()

@@ -9,12 +9,15 @@ export class SectionReposity {
   async init () {
     const section = await SectionModel.findAll()
 
-    section.forEach (item => {
-      const result = new SectionEntity(item)
-      this.list.push(result)
-    })
+    await Promise.all(
+      section.map (item => {
+        const result = new SectionEntity(item)
+        this.list.push(result)
+      })
+    )
 
     console.log('Sections Reposity Init')
+    return this
   }
 
   getList () {

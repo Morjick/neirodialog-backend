@@ -64,6 +64,8 @@ export class NewsController {
     const news = new NewsEntity()
     const response = await news.create(body, user)
 
+    if (response.error) return response
+
     this.reposities.news.addNews(news)
 
     return response

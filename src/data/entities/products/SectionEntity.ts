@@ -38,20 +38,28 @@ export class SectionEntity {
   }
 
   public async create () {
-    const isSectionExists = await SectionModel.findOne({ where: { name: this.name } })
-    if (isSectionExists) return {
-      status: 402,
-      message: 'Раздел с таким именем уже существует',
-      error: 'Раздел с таким именем уже существует',
-    }
+    try {
+      const isSectionExists = await SectionModel.findOne({ where: { name: this.name } })
+      if (isSectionExists) return {
+        status: 402,
+        message: 'Раздел с таким именем уже существует',
+        error: 'Раздел с таким именем уже существует',
+      }
 
-    const model = await SectionModel.create({ name: this.name, slug: this.slug, autorID: this.autorID })
+      const model = await SectionModel.create({ name: this.name, slug: this.slug, autorID: this.autorID })
 
-    return {
-      status: 200,
-      message: 'Раздел создан',
-      body: {
-        section: model.dataValues
+      return {
+        status: 200,
+        message: 'Раздел создан',
+        body: {
+          section: model.dataValues
+        }
+      }
+    } catch (error) {
+      return {
+        status: 501,
+        message: 'Ошибка при создании раздела',
+        error,
       }
     }
   }

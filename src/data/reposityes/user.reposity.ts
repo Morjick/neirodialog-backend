@@ -2,7 +2,7 @@ import { UserModel } from "../database/models/UserModel"
 import { UserEntity } from "../entities/UserEntity"
 
 export class UserReposity {
-  list: UserEntity[] = []
+  public list: UserEntity[] = []
 
   constructor () {}
 
@@ -10,15 +10,18 @@ export class UserReposity {
     this.list = []
     const users = await UserModel.findAll()
 
-    users.forEach(async (el) => {
-      const User = new UserEntity({ userID: el.dataValues.id })
-      await User.findUserForID()
-      await User.initCart()
-
-      this.list.push(User)
-    })
+    await Promise.all(
+      users.map(async (el) => {
+        const User = new UserEntity({ userID: el.dataValues.id })
+        await User.findUserForID()
+        await User.initCart()
+  
+        this.list.push(User)
+      })
+    )
 
     console.log(`User Reposity init`)
+    return this
   }
 
   findByID (id: number) {

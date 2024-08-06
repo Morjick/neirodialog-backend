@@ -79,7 +79,6 @@ export class ProductEntity {
 
     const Autor = new UserEntity({ userID: product.autorID })
     const Diller = new DillerEntity()
-    // const Section = this.sectionID ? new SectionEntity({ id: this.sectionID }) : null
     await Diller.getFromID(this.dillerID)
 
     this.totalPrice = this.discount ? this.price - (this.price / this.discount * 100) : this.price

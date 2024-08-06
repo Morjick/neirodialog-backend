@@ -14,15 +14,19 @@ export class DillerReposity {
   async init () {
     const dillerList = await DillerModel.findAll()
 
-    dillerList.forEach(async (el) => {
-      const diller = new DillerEntity()
-      await diller.getFromID(el.dataValues.id)
-
-      this.list.push(diller)
-      return diller
-    })
+    await Promise.all(
+      dillerList.map(async (el) => {
+        const diller = new DillerEntity()
+        await diller.getFromID(el.dataValues.id)
+  
+        this.list.push(diller)
+        return diller
+      })
+    )
 
     console.log('Diller Reposity init')
+
+    return this
   }
 
   public findForName (name: string) {

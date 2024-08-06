@@ -19,14 +19,17 @@ export class NewsReposity {
   async init () {
     const news = await NewsModel.findAll()
 
-    news.forEach(async (el) => {
-      const item = new NewsEntity()
-      item.findByID(el.dataValues.id)
-
-      this.list.push(item)
-    })
+    await Promise.all(
+      news.map(async (el) => {
+        const item = new NewsEntity()
+        item.findByID(el.dataValues.id)
+  
+        this.list.push(item)
+      })
+    )
 
     console.log('News Reposity init')
+    return this
   }
 
   getList (options?: GetNewsListOptions) {

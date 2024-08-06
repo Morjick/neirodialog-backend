@@ -1,8 +1,33 @@
+import { UserRoleType } from "../database/models/UserModel"
 import { ProductModel } from "../database/models/products/ProductModel"
 import { DillerEntity } from "../entities/DillerEntity"
-import { UserEntity } from "../entities/UserEntity"
-import { ProductEntity } from "../entities/products/ProductEntity"
+import { IUserModel, UserEntity } from "../entities/UserEntity"
+import { ProductEntity, TProductType } from "../entities/products/ProductEntity"
 import { SectionEntity } from "../entities/products/SectionEntity"
+
+export interface IProductFilters {
+  type?: TProductType | 'any'
+  search?: string
+  minPrice?: number
+  maxPrice?: number
+  dillerIDs?: number[] | string
+  autorIDs: number[] | string
+}
+
+export interface IGetProductsOptions {
+  role?: UserRoleType
+  user?: IUserModel | null
+  filters?: IProductFilters
+}
+
+const defaultFilters: IProductFilters = {
+  type: 'any',
+  search: '',
+  minPrice: 0,
+  maxPrice: 1000000,
+  dillerIDs: null,
+  autorIDs: null
+}
 
 export class ProductReposity {
   public list: ProductEntity[] = []
@@ -13,22 +38,63 @@ export class ProductReposity {
   async buildReposity () {
     const products = await ProductModel.findAll()
 
-    products.forEach(async (el) => {
-      const product = new ProductEntity()
-      await product.findByID(el.dataValues.id)
-
-      this.list.push(product)
-
-      if (product.isShow) {
-        this.showedProducts.push(product)
-      }
-    })
+    await Promise.all(
+      products.map(async (el) => {
+        const product = new ProductEntity()
+        await product.findByID(el.dataValues.id)
+  
+        this.list.push(product)
+  
+        if (product.isShow) {
+          this.showedProducts.push(product)
+        }
+      })
+    )
 
     console.log('Product Reposity init')
+    return this
   }
 
-  getProducts () {
-    return this.showedProducts
+  getProducts (options?: IGetProductsOptions): ProductEntity[] {
+    const {
+      role = 'USER',
+      user = null,
+      filters = defaultFilters,
+    } = options
+
+    const products = this.getListForRole(role, user)
+      .filter((product) => {
+        const dillersIDs = String(filters.dillerIDs).replace('[', '').replace(']', '').split(',').map((el) => Number(el)).filter((el) => !!el)
+        const autorIDs = String(filters.autorIDs).replace('[', '').replace(']', '').split(',').map((el) => Number(el)).filter((el) => !!el)
+
+        if ((filters.type && filters.type !== 'any') && product.type !== filters.type) return null
+
+        if ((filters.minPrice && filters.minPrice > 0) && product.price < filters.minPrice) return null
+        if ((filters.maxPrice && filters.maxPrice < 1000000) && product.price > filters.maxPrice) return null
+
+        if ((filters.dillerIDs && dillersIDs.length) && !dillersIDs.includes(product.diller.id)) return null
+        if ((filters.autorIDs && autorIDs.length) && !autorIDs.includes(product.autor.id)) return null
+
+        if (filters.search) {
+          const searchString = filters.search.toLowerCase()
+          const tags = product.tags || []
+          let isOk = false
+
+          if (product.name.toLowerCase().includes(searchString)) isOk = true
+          if (String(product.description).toLowerCase().includes(searchString)) isOk = true
+
+          tags.forEach((tag) => {
+            if (!tag) return
+            if (String(tag).toLowerCase().includes(searchString)) isOk = true
+          })
+
+          if (!isOk) return null
+        }
+
+        return product
+      })
+
+    return products
   }
 
   getProductsForAutor (autorID: number) {
@@ -115,5 +181,18 @@ export class ProductReposity {
 
   findProductByID (id: number) {
     return this.list.find(item => item.id === id)
+  }
+
+  getListForRole (role: UserRoleType, user?: IUserModel): ProductEntity[] {
+    if (role == 'ROOT' || role === 'ADMIN') return this.list
+
+    if (role === 'DILLER') return this.list.map((product) => {
+      const isDiller = user ? product.diller.accessUser(user.id) : false
+      if (product.isShow || isDiller) return product
+    })
+
+    if (role === 'MODERATOR' || role === 'USER') return this.showedProducts
+
+    return this.showedProducts
   }
 }

@@ -3,6 +3,7 @@ import { IUserOpenData } from "./UserEntity"
 import { IProductModel, TProductType } from "./products/ProductEntity"
 import { DillerModel } from '../database/models/DillerModel'
 import getTransplit from '~/libs/getTranslate'
+import { GlobalReposities, IGlobalReposisies } from '../reposityes'
 
 export type TDillerProductTypePermission = 'any' | 'physical' | 'electronic'
 
@@ -22,6 +23,8 @@ export type TDillerUserRole = 'MANAGER' | 'ADMIN' | 'DIRECTOR'
 export interface IDillerUser extends IUserOpenData {
   role: TDillerUserRole
 }
+
+const reposities: IGlobalReposisies = GlobalReposities
 
 export class DillerEntity {
   public name: string
@@ -135,7 +138,7 @@ export class DillerEntity {
     this.managersID = diller.managersID || []
     this.id = diller.id
 
-    this.director = await new UserEntity({ userID: this.directorID }).getAutor()
+    this.director = await reposities.users.findByID(this.directorID).getAutor()
 
     return await this.findCommand()
   }
@@ -144,7 +147,8 @@ export class DillerEntity {
     const comand: IDillerUser[] = []
 
     this.adminsID.forEach(async (id) => {
-      const user = await new UserEntity({ userID: id }).getAutor()
+      // const user = await new UserEntity({ userID: id }).getAutor()
+      const user = await reposities.users.findByID(id).getAutor()
       if (!user) return
 
       this.command.push({
@@ -154,7 +158,8 @@ export class DillerEntity {
     })
 
     this.managersID.forEach(async (id) => {
-      const user = await new UserEntity({ userID: id }).getAutor()
+      // const user = await new UserEntity({ userID: id }).getAutor()
+      const user = await reposities.users.findByID(id).getAutor()
       if (!user) return
 
       this.command.push({

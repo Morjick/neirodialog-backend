@@ -28,15 +28,9 @@ export const createReposities = async () => {
   const newsReposity = new NewsReposity()
   const userReposity = new UserReposity()
 
-  await userReposity.init()
-  await dillerReposity.init()
-  await productReposity.buildReposity()
-  await sections.init()
-  await newsReposity.init()
-
-  GlobalReposities.diller = dillerReposity
-  GlobalReposities.products = productReposity
-  GlobalReposities.news = newsReposity
-  GlobalReposities.sections = sections
-  GlobalReposities.users = userReposity
+  GlobalReposities.users = await userReposity.init()
+  GlobalReposities.diller = await dillerReposity.init()
+  GlobalReposities.sections = await sections.init()
+  GlobalReposities.products = await productReposity.buildReposity()
+  GlobalReposities.news  = await newsReposity.init()
 }

@@ -41,6 +41,13 @@ export const checkToken = async (token: string): Promise<ICheckTokenResponse> =>
       message: 'Авторизация подтверждена',
     }
   } catch (error) {
+    if (error == 'TokenExpiredError: jwt expired') return {
+      message: 'Срок действия токена истёк',
+      error: 'TokenExpiredError: jwt expired',
+      status: 401,
+      ok: false,
+    }
+    
     return {
       message: 'Не удалось подтвердить авторизацию',
       ok: false,

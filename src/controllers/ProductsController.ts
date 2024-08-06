@@ -1,4 +1,4 @@
-import { Body, Get, JsonController, Params, Post, Req, UseBefore } from "routing-controllers"
+import { Body, Get, JsonController, Params, Post, QueryParams, Req, UseBefore } from "routing-controllers"
 import {
   AddToCartContract,
   ChangeSectionForProductContract,
@@ -13,7 +13,7 @@ import { ProductEntity } from "~/data/entities/products/ProductEntity"
 import { SectionEntity } from "~/data/entities/products/SectionEntity"
 import { GlobalReposities, IGlobalReposisies } from "~/data/reposityes"
 import { AdminMiddleware } from "~/middleware/admin.middleware"
-import { AuthMiddleware } from "~/middleware/auth.middleware"
+import { AuthMiddleware, IsAuthMiddleware } from "~/middleware/auth.middleware"
 import { DillerMiddleware } from "~/middleware/diller.middleware"
 
 @JsonController('/products')
@@ -28,7 +28,9 @@ export class ProductsController {
     
     const sectionItem = await Section.create()
 
-    this.reposities.sections.addSection(Section)
+    if (sectionItem.status == 200 || sectionItem.status == 201) {
+      this.reposities.sections.addSection(Section)
+    }
 
     return sectionItem
   }
@@ -104,12 +106,24 @@ export class ProductsController {
   }
 
   @Get('/get-products')
-  async getProducts () {
+  @UseBefore(IsAuthMiddleware)
+  async getProducts (@Req() request, @QueryParams() filters) {
+    const user: IUserModel | null = request.user
+
+    const options = {
+      role: user ? user.role : 'USER',
+      user: user,
+      filters,
+    }
+
+    const products = this.reposities.products.getProducts(options)
+
     return {
       status: 200,
       message: 'Список продуктов получен',
       body: {
-        products: this.reposities.products.getProducts(),
+        totalCount: products.length,
+        products,
         sections: this.reposities.sections.getList(),
       }
     }

@@ -407,7 +407,45 @@
         "x-swagger-router-controller": "home",
         "operationId": "get-products",
         "tags": ["Products"],
-        "description": "Получить список продуктов"
+        "description": "Получить список продуктов",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "minPrice",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "maxPrice",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "dillerIDs",
+            "in": "json",
+            "required": true,
+            "type": "array"
+          },
+          {
+            "name": "autorIDs",
+            "in": "json",
+            "required": true,
+            "type": "array"
+          }
+        ]
       }
     },
     "products/get-products/:slug": {

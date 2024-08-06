@@ -50,17 +50,19 @@ export class BasketEntity {
     try {
       const list: IBasketItemModel[] = JSON.parse(data.items) || []
 
-      const products: IBasketElement[] = await Promise.all(list.map(async (el) => {
-        const product = new ProductEntity()
-        await product.findByID(el.productID)
+      const products: IBasketElement[] = await Promise.all(
+        list.map(async (el) => {
+          const product = new ProductEntity()
+          await product.findByID(el.productID)
 
-        if (!product || !product.id) return
+          if (!product || !product.id) return
 
-        return {
-          ...el,
-          product
-        }
-      }))
+          return {
+            ...el,
+            product
+          }
+        })
+      )
 
       this.items = products
       this.isValid = this.isValidCart
