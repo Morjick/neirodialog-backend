@@ -1,0 +1,647 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Neirodialog API",
+    "description": "Тут описаны методы для взаимодействия с основными сущностями",
+    "version": "1.0"
+  },
+  "produces": ["application/json"],
+  "paths": {
+    "/user/create-user": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "sign up",
+        "tags": ["User"],
+        "description": "Создать пользователя",
+        "parameters": [
+          {
+            "name": "firstname",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "301": {
+            "description": "Данные не валидны",
+            "examples": {
+              "application/json": {
+                "status": 301,
+                "message": "Пользователь с таким email уже существует",
+                "error": "DataIsExists"
+              }
+            }
+          },
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "body": {
+                  "user": "UserClass",
+                  "token": "adwkndjasbdkhagwbdasbdkbhagwi7dey1872hdkjab"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "login",
+        "tags": ["User"],
+        "description": "Создать пользователя",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          }
+        ],      
+        "responses": {
+          "301": {
+            "description": "Данные не валидны",
+            "examples": {
+              "application/json": {
+                "status": 301,
+                "message": "Не верный пароль",
+                "error": "Invalid"
+              }
+            }
+          },
+          "404": {
+            "description": "Данные не найдены",
+            "examples": {
+              "application/json": {
+                "status": 404,
+                "message": "Пользователь с таким email не найден",
+                "error": "Invalid"
+              }
+            }
+          },
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Пользователь авторизован",
+                "body": {
+                  "user": "UserClass",
+                  "token": "adwkndjasbdkhagwbdasbdkbhagwi7dey1872hdkjab"
+                }
+              }
+            }
+          }
+        }
+      }
+    },  
+    "/user/check-token": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "check-token",
+        "tags": ["User"],
+        "description": "Создать пользователя",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Пользователь авторизован"
+              }
+            }
+          },
+          "401": {
+            "examples": {
+              "application/json": {
+                "status": 401,
+                "message": "Не удалось подтвердить авторизацию",
+                "error": "Unauthorized"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/get-cart": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-cart",
+        "tags": ["User"],
+        "description": "Получить файл"
+      }
+    },
+    "/static/upload-file": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "upload-file",
+        "tags": ["Static"],
+        "description": "Загрузить файл",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Файл загружен",
+                "body": {
+                  "path": "jalwbdkjasjbdhkbawd.jpg"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-file/:path": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-file",
+        "tags": ["Static"],
+        "description": "Получить файл"
+      }
+    },
+    "/app/add-review": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-file",
+        "tags": ["App"],
+        "description": "Получить файл",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "nickname",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "messagerType",
+            "in": "json",
+            "required": true,
+            "type": "string",
+            "enum": ["telegram", "whatsapp", "vk"]
+          },
+          {
+            "name": "messagerHref",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/products/create-section": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-section",
+        "tags": ["Products"],
+        "description": "Создать раздел для продуктов",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/products/get-sections": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-sections",
+        "tags": ["Products"],
+        "description": "Получить все разделы для продуктов"
+      }
+    },
+    "/products/create-diller": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-diller",
+        "tags": ["Products"],
+        "description": "Создать продавца",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "directorID",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "productTypePermission",
+            "in": "json",
+            "required": true,
+            "type": "string",
+            "enum": ["physical", "electronic", "any"]
+          },
+          {
+            "name": "availableProductsCount",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "availableCommandLength",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "/products/get-dillers": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-dillers",
+        "tags": ["Products"],
+        "description": "Получить список продавцов"
+      }
+    },
+    "/products/create-product": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-products",
+        "tags": ["Products"],
+        "description": "Создать продукт",
+        "parameters": [
+          {
+            "name": "description",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "countInStock",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "discount",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "avatar",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "images",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "videos",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "sectionID",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "autorID",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "dillerID",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "isShow",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "tags",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          }
+        ]
+      }
+    },
+    "products/get-products": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-products",
+        "tags": ["Products"],
+        "description": "Получить список продуктов"
+      }
+    },
+    "products/get-products/:slug": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-products-slug",
+        "tags": ["Products"],
+        "description": "Получить детальную информацию о продукте"
+      }
+    },
+    "/products/set-product-section": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "set-product-section",
+        "tags": ["Products"],
+        "description": "Привязатель продукт к разделу",
+        "parameters": [
+          {
+            "name": "productID",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "sectionID",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "/products/add-comment": {
+      "x-swagger-router-controller": "home",
+      "operationId": "set-product-section",
+      "tags": ["Products"],
+      "description": "Оставить комментарий",
+      "parameters": [
+        {
+          "name": "productID",
+          "in": "json",
+          "required": true,
+          "type": "number"
+        },
+        {
+          "name": "message",
+          "in": "json",
+          "required": true,
+          "type": "string"
+        }
+      ]
+
+    },
+    "/products/add-to-cart": {
+        "x-swagger-router-controller": "home",
+        "operationId": "add-to-cart",
+        "tags": ["Products"],
+        "description": "Добавить товар в корзину",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          }
+        ]
+    },
+    "/news/get-news": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-news",
+        "tags": ["News"],
+        "description": "Получить список новостей",
+        "responses": {
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Новости получены",
+                "body": {
+                  "news": "NewsEntity[]",
+                  "totalCount": 20
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news/get-news/:slug": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-news-slug",
+        "tags": ["News"],
+        "description": "Получить детальную информацию о новости",
+        "responses": {
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Новости получены",
+                "body": {
+                  "news": "NewsEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Новость не найдена",
+                "body": {},
+                "error": "NotFound"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news/create-news": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-news",
+        "tags": ["News"],
+        "description": "Создать новость",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "published",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tags",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Новость создана",
+                "body": {
+                  "news": "NewsEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "examples": {
+              "application/json": {
+                "ok": false,
+                "status": 403,
+                "message": "Для этого метода у вас недостаточно прав",
+                "error": "Для этого метода у вас недостаточно прав"
+              }
+            }
+          },
+          "400": {
+            "examples": {
+              "application/json": {
+                "status": 400,
+                "message": "Новость с таким именем не может быть создана",
+                "error": "SlugIsNotUnique"
+              }
+            }
+          },
+          "501": {
+            "examples": {
+              "application/json": {
+                "status": 501,
+                "message": "Ошибка при создании новости",
+                "error": "Slug must be unique"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news/update-published": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "update-published-news",
+        "tags": ["News"],
+        "description": "Изменить статус публикации новости",
+        "parameters": [
+          {
+            "name": "published",
+            "in": "json",
+            "required": true,
+            "type": "boolean"
+          },
+          {
+            "name": "slug",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  }
+}

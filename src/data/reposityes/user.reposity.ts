@@ -1,0 +1,31 @@
+import { UserModel } from "../database/models/UserModel"
+import { UserEntity } from "../entities/UserEntity"
+
+export class UserReposity {
+  list: UserEntity[] = []
+
+  constructor () {}
+
+  async init () {
+    this.list = []
+    const users = await UserModel.findAll()
+
+    users.forEach(async (el) => {
+      const User = new UserEntity({ userID: el.dataValues.id })
+      await User.findUserForID()
+      await User.initCart()
+
+      this.list.push(User)
+    })
+
+    console.log(`User Reposity init`)
+  }
+
+  findByID (id: number) {
+    return this.list.find((el) => el.id === id)
+  }
+
+  getList () {
+    return this.list
+  }
+}
