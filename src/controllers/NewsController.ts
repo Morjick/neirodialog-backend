@@ -75,7 +75,7 @@ export class NewsController {
   @UseBefore(AdminMiddleware)
   async updateNews (@Body() body: CreateNewsContract, @Params() params) {
     const slug = params.slug
-    
+
     const news = this.reposities.news.getNews(slug)
     await news.update(body)
 

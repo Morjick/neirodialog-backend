@@ -92,6 +92,8 @@ export class ProductEntity {
       const comment = new CommentEntity()
       comment.findByID(item)
 
+      if (comment.status === 'moderation') return
+
       this.comments.push(comment)
     })
 

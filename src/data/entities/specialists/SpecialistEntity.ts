@@ -21,9 +21,7 @@ export class SpecialistEntity {
   public userID: number
   public specialisationsID: number[]
   public specialisations: SpecialisationEntity[] = []
-  public userData: IUserOpenData
-
-  private user: UserEntity
+  public user: IUserOpenData
   
   constructor () {
     this.hash = createRandomString()
@@ -76,8 +74,7 @@ export class SpecialistEntity {
   }
 
   public async setUser (user: UserEntity) {
-    this.user = user
-    this.userData = await this.user.getAutor()
+    this.user = await user.getAutor()
   }
 
   private async updateSpecialisations () {

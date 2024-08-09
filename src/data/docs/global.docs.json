@@ -479,45 +479,48 @@
       }
     },
     "/products/add-comment": {
-      "x-swagger-router-controller": "home",
-      "operationId": "set-product-section",
-      "tags": ["Products"],
-      "description": "Оставить комментарий",
-      "parameters": [
-        {
-          "name": "productID",
-          "in": "json",
-          "required": true,
-          "type": "number"
-        },
-        {
-          "name": "message",
-          "in": "json",
-          "required": true,
-          "type": "string"
-        }
-      ]
-
-    },
-    "/products/add-to-cart": {
+      "post": {
         "x-swagger-router-controller": "home",
-        "operationId": "add-to-cart",
+        "operationId": "add-comment",
         "tags": ["Products"],
-        "description": "Добавить товар в корзину",
+        "description": "Оставить комментарий",
         "parameters": [
           {
-            "name": "slug",
-            "in": "json",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "count",
+            "name": "productID",
             "in": "json",
             "required": true,
             "type": "number"
+          },
+          {
+            "name": "message",
+            "in": "json",
+            "required": true,
+            "type": "string"
           }
         ]
+      }
+    },
+    "/products/add-to-cart": {
+        "post": {
+          "x-swagger-router-controller": "home",
+          "operationId": "add-to-cart",
+          "tags": ["Products"],
+          "description": "Добавить товар в корзину",
+          "parameters": [
+            {
+              "name": "slug",
+              "in": "json",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "count",
+              "in": "json",
+              "required": true,
+              "type": "number"
+            }
+          ]
+        }
     },
     "/news/get-news": {
       "get": {
@@ -578,6 +581,93 @@
         "operationId": "create-news",
         "tags": ["News"],
         "description": "Создать новость",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "published",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tags",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Новость создана",
+                "body": {
+                  "news": "NewsEntity"
+                }
+              }
+            }
+          },
+          "403": {
+            "examples": {
+              "application/json": {
+                "ok": false,
+                "status": 403,
+                "message": "Для этого метода у вас недостаточно прав",
+                "error": "Для этого метода у вас недостаточно прав"
+              }
+            }
+          },
+          "400": {
+            "examples": {
+              "application/json": {
+                "status": 400,
+                "message": "Новость с таким именем не может быть создана",
+                "error": "SlugIsNotUnique"
+              }
+            }
+          },
+          "501": {
+            "examples": {
+              "application/json": {
+                "status": 501,
+                "message": "Ошибка при создании новости",
+                "error": "Slug must be unique"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news/update-news/:slug": {
+      "patch": {
+        "x-swagger-router-controller": "home",
+        "operationId": "update-news",
+        "tags": ["News"],
+        "description": "Изменить новость",
         "parameters": [
           {
             "name": "title",

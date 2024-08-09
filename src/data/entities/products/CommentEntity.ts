@@ -1,5 +1,5 @@
 import { CommentModel } from "~/data/database/models/products/CommentModel"
-import { UserEntity } from "../UserEntity"
+import { IUserOpenData, UserEntity } from "../UserEntity"
 import { CreateCommentContract } from "~/data/contracts/product.contracts"
 import { obscense } from "~/libs/obscense"
 
@@ -19,7 +19,7 @@ export class CommentEntity {
   autorID: number
   message: string
   status: TCommentStatus
-  autor: UserEntity
+  autor: IUserOpenData
   productID: number
 
   constructor () {}
@@ -36,7 +36,7 @@ export class CommentEntity {
     this.productID = comment.productID
 
     const autor = new UserEntity({ userID: this.autorID })
-    this.autor = autor
+    this.autor = await autor.getAutor()
   }
 
   public async create (data: CreateCommentContract, autorID: number) {
