@@ -1,4 +1,4 @@
-import { Body, Get, JsonController, Params, Post, QueryParams, Req, UseBefore } from "routing-controllers"
+import { Body, Delete, Get, JsonController, Params, Post, QueryParams, Req, UseBefore } from "routing-controllers"
 import {
   AddToCartContract,
   ChangeSectionForProductContract,
@@ -6,12 +6,14 @@ import {
   CreateDillerContract,
   CreateProductContract,
   CreateProductSectionContract,
+  CreatePromocodeContract,
 } from "~/data/contracts/product.contracts"
 import { DillerEntity } from "~/data/entities/DillerEntity"
 import { IUserModel, UserEntity } from "~/data/entities/UserEntity"
 import { ProductEntity } from "~/data/entities/products/ProductEntity"
 import { SectionEntity } from "~/data/entities/products/SectionEntity"
-import { GlobalReposities, IGlobalReposisies } from "~/data/reposityes"
+import { GlobalReposities, IGlobalReposisies, Reposity } from "~/data/reposityes"
+import { IPromocodesOptions } from "~/data/reposityes/product.reposity"
 import { AdminMiddleware } from "~/middleware/admin.middleware"
 import { AuthMiddleware, IsAuthMiddleware } from "~/middleware/auth.middleware"
 import { DillerMiddleware } from "~/middleware/diller.middleware"
@@ -44,6 +46,14 @@ export class ProductsController {
         sections: this.reposities.sections.getList(),
       }
     }
+  }
+
+  @Delete('/delete-sections/:id')
+  @UseBefore(AdminMiddleware)
+  async deleteSections (@Params() params) {
+    const { id } = params
+
+    return await this.reposities.sections.deleteSection(id)
   }
 
   @Post('/create-diller')
@@ -94,7 +104,7 @@ export class ProductsController {
     const product = await Product.create(body, diller, user)
 
     if (product.status == 200 || product.status == 201) {
-      await this.reposities.products.addProduct(product.body.product.id)
+      await Reposity.products.addProduct(product.body.product.id)
     }
 
     return {
@@ -103,6 +113,14 @@ export class ProductsController {
       error: product.error,
       body: product.body,
     }
+  }
+
+  @Delete('/delete-product/:id')
+  @UseBefore(AdminMiddleware)
+  async deleteProduct (@Params() params) {
+    const { id } = params
+
+    return await this.reposities.products.deleteProduct(id)
   }
 
   @Get('/get-products')
@@ -237,6 +255,45 @@ export class ProductsController {
       error: result.error,
       body: {
         basket: user.getBasket()
+      },
+    }
+  }
+
+  @Get('/promocodes')
+  @UseBefore(IsAuthMiddleware)
+  async getPromocodes (@Req() request) {
+    const user: IUserModel = request.user
+
+    const options: IPromocodesOptions = {
+      status: user?.role === 'USER' ? 'active' : 'all'
+    }
+
+    const promocodes = this.reposities.products.getPromocodes(options)
+
+    return {
+      status: 200,
+      message: 'Промокоды получены',
+      body: {
+        promocodes,
+      },
+    }
+  }
+
+  @Post('/create-promocode')
+  @UseBefore(AdminMiddleware)
+  async createPromocode (@Body() body: CreatePromocodeContract, @Req() request) {
+    const user: IUserModel = request.user
+
+    const result = await this.reposities.products.createPromocode({
+      ...body,
+      autorID: user.id
+    })
+
+    return {
+      status: result.status,
+      message: result.message,
+      body: {
+        ...result.body,
       },
     }
   }

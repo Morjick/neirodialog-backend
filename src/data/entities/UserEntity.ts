@@ -67,12 +67,13 @@ export class UserEntity {
       await basket.findByID(this.basketID)
     } else {
       await basket.create(this.user.id)
+
+      await UserModel.update({ basketID: basket.id }, { where: { id: this.id } })
     }
 
     this.basket = basket
     this.basketID = this.basket.id
-
-    await UserModel.update({ basketID: this.basketID }, { where: { id: this.id } })
+    return this.basket
   }
 
   public getRole (): UserRoleType {
@@ -113,7 +114,10 @@ export class UserEntity {
     return result
   }
 
-  public getBasket () {
+  public async getBasket () {
+    if (!this.basket) return await this.initCart()
+    
+    this.basket.getPrice
     return this.basket
   }
 }

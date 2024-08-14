@@ -1,6 +1,7 @@
 import { secretKey } from './../data/database/index'
 import * as jwt from 'jsonwebtoken'
-import { UserEntity, type IUserModel } from '~/data/entities/UserEntity'
+import { type IUserModel } from '~/data/entities/UserEntity'
+import { Reposity } from '~/data/reposityes'
 
 export interface ICheckTokenResponse {
   message: string
@@ -31,8 +32,9 @@ export const checkToken = async (token: string): Promise<ICheckTokenResponse> =>
       }
     }
 
-    const User = new UserEntity({ userID: id })
-    const user = await User.getUser()
+    const reposity = Reposity.users
+
+    const user = await reposity.list.find((el) => el.id == id).getUser()
 
     return {
       user,

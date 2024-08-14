@@ -1,5 +1,6 @@
 import { createExpressServer } from 'routing-controllers'
 import 'dotenv/config'
+import compression from 'compression'
 import { UserController } from './controllers/UserController'
 import { GlobalResponseInterceptor } from './data/interceptors/GlobalResponseInterceptor'
 import { ProductsController } from './controllers/ProductsController'
@@ -11,13 +12,14 @@ import GlobalDocs from './data/docs/global.docs.json'
 import { AppControlelr } from './controllers/AppController'
 import { StaticControlelr } from './controllers/StaticController'
 import * as path from 'path'
+import { OrderControlelr } from './controllers/OrderController'
 
 const startServer = async () => {
   try {
     const port = process.env.PORT
 
     const app = createExpressServer({
-      controllers: [UserController, ProductsController, NewsController, AppControlelr, StaticControlelr],
+      controllers: [UserController, ProductsController, NewsController, AppControlelr, StaticControlelr, OrderControlelr],
       interceptors: [GlobalResponseInterceptor],
       cors: {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -48,11 +50,12 @@ const startServer = async () => {
     
     app.use('/api-docs', swagger.serve, swagger.setup(GlobalDocs, swaggerOptions))
 
-    app.get('/get-file/:path', async (req, res) => {
+    app.get('/get-file/:directory/:path', async (req, res) => {
       try {
         const imagePath = req.params.path
+        const directory = req.params.directory
   
-        res.sendFile(`${imagePath}`, { root: path.join(__dirname, 'data', 'static') })
+        res.sendFile(`${imagePath}`, { root: path.join(__dirname, 'data', 'static', directory) })
       } catch (e) {
         console.log('error to send file', e)
   
@@ -65,6 +68,8 @@ const startServer = async () => {
     })
 
     console.log(`Server has been started on PORT - ${port}`)
+
+    app.use(compression())
 
     app.listen(port)
 

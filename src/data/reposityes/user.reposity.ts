@@ -8,13 +8,13 @@ export class UserReposity {
 
   async init () {
     this.list = []
-    const users = await UserModel.findAll()
+    const users = await UserModel.findAll({ attributes: ['id'] })
 
     await Promise.all(
       users.map(async (el) => {
         const User = new UserEntity({ userID: el.dataValues.id })
         await User.findUserForID()
-        await User.initCart()
+        // await User.initCart()
   
         this.list.push(User)
       })

@@ -138,9 +138,11 @@ export class DillerEntity {
     this.managersID = diller.managersID || []
     this.id = diller.id
 
-    this.director = await reposities.users.findByID(this.directorID).getAutor()
+    // this.director = await reposities.users.findByID(this.directorID).getAutor()
+    const User = new UserEntity({ userID: this.directorID })
+    this.director = await User.getAutor()
 
-    return await this.findCommand()
+    return this.findCommand()
   }
 
   private async findCommand () {

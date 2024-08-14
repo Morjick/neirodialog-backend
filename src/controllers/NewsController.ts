@@ -1,4 +1,4 @@
-import { Body, Get, JsonController, Params, Patch, Post, Req, UseBefore } from "routing-controllers"
+import { Body, Delete, Get, JsonController, Params, Patch, Post, QueryParams, Req, UseBefore } from "routing-controllers"
 import { CreateNewsContract, UpdatePublishedContract } from "~/data/contracts/news.contracts"
 import { NewsEntity } from "~/data/entities/news/NewsEntity"
 import { IUserModel } from "~/data/entities/UserEntity"
@@ -12,12 +12,15 @@ export class NewsController {
 
   @Get('/get-news')
   @UseBefore(IsAuthMiddleware)
-  getNews (@Req() request) {
+  getNews (@Req() request, @QueryParams() filters) {
     const user: IUserModel | null = request.user
 
-    const news = this.reposities.news.getList({
-      role: user ? user.role : 'USER'
-    })
+    const options = {
+      role: user ? user.role : 'USER',
+      filters,
+    }
+
+    const news = this.reposities.news.getList(options)
 
     return {
       status: 200,
@@ -69,6 +72,14 @@ export class NewsController {
     this.reposities.news.addNews(news)
 
     return response
+  }
+
+  @Delete('/delete-news/:id')
+  @UseBefore(AdminMiddleware)
+  async deleteNews (@Params() params) {
+    const { id } = params
+
+    return this.reposities.news.delete(id)
   }
 
   @Patch('/update-news/:slug')

@@ -69,4 +69,7 @@ export class ProductModel extends Model<IProductModel> {
 
   @Column({ type: DataType.ARRAY(DataType.INTEGER) })
   commentsID: number[]
+
+  @Column({ type: DataType.ARRAY(DataType.INTEGER) })
+  documentsID: number[]
 }

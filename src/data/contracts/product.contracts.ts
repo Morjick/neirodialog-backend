@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString, MaxLength, MinLength } from "class-validator"
+import { IsEmail, IsNotEmpty, IsNumber, IsString, Max, MaxLength, Min, MinLength } from "class-validator"
 import { TDillerProductTypePermission } from "../entities/DillerEntity"
 import { IProductFeatures, TProductType } from "../entities/products/ProductEntity"
 
@@ -29,6 +29,8 @@ export class CreateDillerContract {
   availableCommandLength?: number
 
   description?: string
+
+  avatar?: string
 }
 
 export class CreateProductContract {
@@ -45,6 +47,7 @@ export class CreateProductContract {
   dillerID: number
   isShow: boolean
   tags: string[]
+  documentsID?: number[]
 
   @IsString({ message: 'Имя продукта должно быть строкой' })
   @MinLength(4, { message: 'Минимальная длинна имени - 4 символа' })
@@ -84,4 +87,20 @@ export class AddToCartContract {
 
   @IsNotEmpty({ message: 'Укажите колличество продукта' })
   count: number
+}
+
+export class CreatePromocodeContract {
+  @IsString({ message: 'Укажите заголовок продукта' })
+  @IsNotEmpty({ message: 'Укажите заголовок продукта' })
+  title: string
+
+  @IsNumber({}, { message: 'Укаджите скидку (какой процент скидки будет выдан при применении)' })
+  @Min(1, { message: 'Минимальная скидка - 1%' })
+  @Max(100, { message: 'Максимальная скидка - 100%' })
+  discount: number
+
+  minPrice?: number
+
+  @IsNumber({}, { message: 'Укажите лиимит на применение промокода' })
+  limit: number
 }

@@ -7,7 +7,7 @@
   },
   "produces": ["application/json"],
   "paths": {
-    "/user/create-user": {
+    "user/create-user": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "sign up",
@@ -58,7 +58,7 @@
         }
       }
     },
-    "/user/login": {
+    "user/login": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "login",
@@ -114,7 +114,7 @@
         }
       }
     },  
-    "/user/check-token": {
+    "user/check-token": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "check-token",
@@ -149,7 +149,7 @@
         }
       }
     },
-    "/user/get-cart": {
+    "user/get-cart": {
       "get": {
         "x-swagger-router-controller": "home",
         "operationId": "get-cart",
@@ -157,7 +157,7 @@
         "description": "Получить файл"
       }
     },
-    "/static/upload-file": {
+    "static/upload-file": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "upload-file",
@@ -186,7 +186,36 @@
         }
       }
     },
-    "/get-file/:path": {
+    "static/upload-docs": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "upload-docs",
+        "tags": ["Static"],
+        "description": "Загрузить документ",
+        "parameters": [
+          {
+            "name": "document",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "examples": {
+              "application/json": {
+                "status": 200,
+                "message": "Документ был загружен",
+                "body": {
+                  "path": "jalwbdkjasjbdhkbawd.jpg"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "get-file/:path": {
       "get": {
         "x-swagger-router-controller": "home",
         "operationId": "get-file",
@@ -194,7 +223,7 @@
         "description": "Получить файл"
       }
     },
-    "/app/add-review": {
+    "app/add-review": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "get-file",
@@ -235,7 +264,7 @@
         ]
       }
     },
-    "/products/create-section": {
+    "products/create-section": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "create-section",
@@ -251,7 +280,7 @@
         ]
       }
     },
-    "/products/get-sections": {
+    "products/get-sections": {
       "get": {
         "x-swagger-router-controller": "home",
         "operationId": "get-sections",
@@ -259,7 +288,15 @@
         "description": "Получить все разделы для продуктов"
       }
     },
-    "/products/create-diller": {
+    "products/delete-sections": {
+      "delete": {
+        "x-swagger-router-controller": "home",
+        "operationId": "delete-sections",
+        "tags": ["Products"],
+        "description": "Удалить раздел"
+      }
+    },
+    "products/create-diller": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "create-diller",
@@ -276,6 +313,12 @@
             "name": "email",
             "in": "json",
             "required": true,
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "in": "json",
+            "required": false,
             "type": "string"
           },
           {
@@ -312,7 +355,7 @@
         ]
       }
     },
-    "/products/get-dillers": {
+    "products/get-dillers": {
       "get": {
         "x-swagger-router-controller": "home",
         "operationId": "get-dillers",
@@ -320,7 +363,7 @@
         "description": "Получить список продавцов"
       }
     },
-    "/products/create-product": {
+    "products/create-product": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "create-products",
@@ -328,21 +371,39 @@
         "description": "Создать продукт",
         "parameters": [
           {
-            "name": "description",
+            "name": "name",
             "in": "json",
             "required": true,
+            "type": "string"
+          },
+          {
+            "name": "price",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
             "type": "string"
           },
           {
             "name": "body",
             "in": "json",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
             "name": "countInStock",
             "in": "json",
-            "required": true,
+            "required": false,
             "type": "number"
           },
           {
@@ -395,6 +456,12 @@
           },
           {
             "name": "tags",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "documentsID",
             "in": "json",
             "required": false,
             "type": "array"
@@ -456,7 +523,7 @@
         "description": "Получить детальную информацию о продукте"
       }
     },
-    "/products/set-product-section": {
+    "products/set-product-section": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "set-product-section",
@@ -478,7 +545,7 @@
         ]
       }
     },
-    "/products/add-comment": {
+    "products/add-comment": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "add-comment",
@@ -500,7 +567,7 @@
         ]
       }
     },
-    "/products/add-to-cart": {
+    "products/add-to-cart": {
         "post": {
           "x-swagger-router-controller": "home",
           "operationId": "add-to-cart",
@@ -522,7 +589,51 @@
           ]
         }
     },
-    "/news/get-news": {
+    "products/create-promocode": {
+        "post": {
+          "x-swagger-router-controller": "home",
+          "operationId": "create-promocode",
+          "tags": ["Products"],
+          "description": "Создать промокод",
+          "parameters": [
+            {
+              "name": "title",
+              "in": "json",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "limit",
+              "in": "json",
+              "required": true,
+              "type": "number"
+            },
+            {
+              "name": "minPrice",
+              "in": "json",
+              "required": false,
+              "type": "number"
+            },
+            
+            {
+              "name": "discount",
+              "in": "json",
+              "required": false,
+              "type": "number"
+            }
+          ]
+        }
+    },
+    "products/promocodes": {
+        "get": {
+          "x-swagger-router-controller": "home",
+          "operationId": "get-promocodes",
+          "tags": ["Products"],
+          "description": "Получить список промокодов",
+          "parameters": []
+        }
+    },
+    "news/get-news": {
       "get": {
         "x-swagger-router-controller": "home",
         "operationId": "get-news",
@@ -541,10 +652,24 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "search",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "autorIDs",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          }
+        ]
       }
     },
-    "/news/get-news/:slug": {
+    "news/get-news/:slug": {
       "get": {
         "x-swagger-router-controller": "home",
         "operationId": "get-news-slug",
@@ -575,7 +700,7 @@
         }
       }
     },
-    "/news/create-news": {
+    "news/create-news": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "create-news",
@@ -662,7 +787,7 @@
         }
       }
     },
-    "/news/update-news/:slug": {
+    "news/update-news/:slug": {
       "patch": {
         "x-swagger-router-controller": "home",
         "operationId": "update-news",
@@ -749,7 +874,7 @@
         }
       }
     },
-    "/news/update-published": {
+    "news/update-published": {
       "post": {
         "x-swagger-router-controller": "home",
         "operationId": "update-published-news",
@@ -769,6 +894,24 @@
             "type": "string"
           }
         ]
+      }
+    },
+    "orders/create-order": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-order",
+        "tags": ["Orders"],
+        "description": "Создать заказ",
+        "parameters": []
+      }
+    },
+    "orders/get-orders": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-orders",
+        "tags": ["Orders"],
+        "description": "Получить список заказов",
+        "parameters": []
       }
     }
   }

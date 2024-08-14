@@ -30,6 +30,9 @@ export class DillerModel extends Model {
   @Column({ type: DataType.TEXT })
   description: string
 
+  @Column({ type: DataType.STRING })
+  avatar: string
+
   @Column({ type: DataType.INTEGER })
   directorID: number
 

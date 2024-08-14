@@ -63,4 +63,21 @@ export class SectionEntity {
       }
     }
   }
+
+  public static async delete (id: number) {
+    try {
+      await SectionModel.destroy({ where: { id } })
+
+      return {
+        status: 200,
+        message: 'Раздел удалён',
+      }
+    } catch (e) {
+      return {
+        status: 501,
+        message: 'Ошибка при удалении раздела',
+        error: e,
+      }
+    }
+  }
 }

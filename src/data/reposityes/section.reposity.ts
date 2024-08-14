@@ -20,6 +20,12 @@ export class SectionReposity {
     return this
   }
 
+  async deleteSection (id: number) {
+    this.list = this.list.filter((el) => el.id !== id)
+
+    return await SectionEntity.delete(id)
+  }
+
   getList () {
     return this.list
   }

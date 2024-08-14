@@ -12,7 +12,7 @@ export class DillerReposity {
   constructor () {}
 
   async init () {
-    const dillerList = await DillerModel.findAll()
+    const dillerList = await DillerModel.findAll({ attributes: ['id'] })
 
     await Promise.all(
       dillerList.map(async (el) => {

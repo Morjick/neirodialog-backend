@@ -128,4 +128,21 @@ export class NewsEntity {
     this.published = false
     NewsModel.update({ published: this.published }, { where: { id: this.id } })
   }
+
+  public static async delete (id: number) {
+    try {
+      await NewsModel.destroy({ where: { id } })
+
+      return {
+        status: 200,
+        message: 'Новость удалена'
+      }
+    } catch (e) {
+      return {
+        status: 200,
+        message: 'При удалении новости произошла ошибка',
+        error: e,
+      }
+    }
+  }
 }

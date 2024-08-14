@@ -129,12 +129,13 @@ export class UserController {
   @UseBefore(AuthMiddleware)
   async getBasket (@Req() request) {
     const user = this.reposities.users.findByID(request.user.id)
+    const cart = await user.getBasket()
 
     return {
       status: 200,
       message: 'Корзина получена',
       body: {
-        cart: user.getBasket()
+        cart,
       }
     }
   }

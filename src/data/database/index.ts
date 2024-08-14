@@ -11,6 +11,10 @@ import { SpecialisationModel } from "./models/specialist/SpecialisationModel"
 import { SpecialistModel } from "./models/specialist/SpecialistModel"
 import { BasketModel } from "./models/user/BasketModel"
 import { ApplicationReviewModel } from "./models/applications/ReviewsModel"
+import { PromocodeModel } from "./models/products/PromocodeModel"
+import { OrderItem } from "./models/orders/OrderItem"
+import { Order } from "./models/orders/OrderModel"
+import { DocumentModel } from "./models/documents/Document"
 
 export interface DataBaseConstructorInterface {
   HOST: string | number
@@ -63,6 +67,10 @@ export const startNeirodialogDataBase = async (data: DataBaseConstructorInterfac
         SpecialistModel,
         BasketModel,
         ApplicationReviewModel,
+        PromocodeModel,
+        OrderItem,
+        Order,
+        DocumentModel,
       ],
     }
   )

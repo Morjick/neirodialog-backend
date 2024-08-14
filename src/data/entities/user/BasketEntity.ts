@@ -1,5 +1,7 @@
 import { BasketModel } from "~/data/database/models/user/BasketModel"
 import { ProductEntity } from "../products/ProductEntity"
+import { Reposity } from "~/data/reposityes"
+import { IResponse } from "~/data/interfaces"
 
 export interface IBasketItemModel {
   productID: number
@@ -17,13 +19,24 @@ export interface IBasketElement extends IBasketItemModel {
   message?: string
 }
 
+export interface IBasketPrice {
+  fullPrice: number
+  totalPrice: number
+  discount: number
+}
+
+interface IGetCartResponse {
+  products: IBasketElement[]
+}
+
 export class BasketEntity {
   public id: number
   public userID: number
-  public totalPrice: number = 0
   public isValid = false
 
-  public items: IBasketElement[]
+  public items: IBasketElement[] = []
+  public price: IBasketPrice = { totalPrice: 0, fullPrice: 0, discount: 0 }
+
   private basketString: string
 
   constructor () {}
@@ -52,13 +65,15 @@ export class BasketEntity {
 
       const products: IBasketElement[] = await Promise.all(
         list.map(async (el) => {
-          const product = new ProductEntity()
-          await product.findByID(el.productID)
+          const productReposity = Reposity.products
+
+          const product = productReposity.list.find((item) => item.id == el.productID)
 
           if (!product || !product.id) return
 
           return {
             ...el,
+            count: product.type == 'electronic' ? 1 : el.count || 1,
             product
           }
         })
@@ -66,11 +81,11 @@ export class BasketEntity {
 
       this.items = products
       this.isValid = this.isValidCart
-      this.totalPrice = this.items.reduce((acc, el) => acc + (el.product.totalPrice * el.count), 0)
     } catch (e) {
-      this.items = []
-      this.totalPrice = 0
+      await this.create(this.userID)
     }
+
+    this.price = this.getPrice
   }
 
   private async updateModel () {
@@ -98,8 +113,7 @@ export class BasketEntity {
           this.items = this.items.filter((el, index) => index !== productIndex)
         }
       } else {
-        const product = new ProductEntity()
-        await product.findByID(data.productID)
+        const product = Reposity.products.findProductByID(data.productID)
 
         if (!product) return {
           status: 404,
@@ -107,13 +121,18 @@ export class BasketEntity {
           error: 'NotFound'
         }
 
+        if (data.count <= 0) return {
+          status: 200,
+          message: 'Укажите колличество товара, которое необходимо добавить',
+          error: 'Invalid'
+        }
+
         this.items.push({
           ...data,
+          count: product.type == 'electronic' ? 1 : data.count || 1,
           product,
         })
       }
-
-      this.totalPrice = this.items.reduce((acc, el) => acc + (el.product.totalPrice * el.count), 0)
 
       await this.updateModel()
       this.isValid = this.isValidCart
@@ -126,6 +145,42 @@ export class BasketEntity {
       return {
         status: 501,
         message: 'Не удалось добавить товар в корзину',
+        error: e,
+      }
+    }
+  }
+
+  public static async getCart (id: number): Promise<IResponse<IGetCartResponse>> {
+    try {
+      const cart = await BasketModel.findOne({ where: { id } })
+      const list: IBasketItemModel[] = JSON.parse(cart.items) || []
+
+      const products: IBasketElement[] = await Promise.all(
+        list.map(async (el) => {
+          const product = new ProductEntity()
+          await product.findByID(el.productID)
+
+          if (!product || !product.id) return
+
+          return {
+            ...el,
+            count: product.type == 'electronic' ? 1 : el.count || 1,
+            product
+          }
+        })
+      )
+
+      return {
+        status: 200,
+        message: 'Корзина получена',
+        body: {
+          products,
+        }
+      }
+    } catch (e) {
+      return {
+        status: 501,
+        message: 'Ошибка при получении корзины',
         error: e,
       }
     }
@@ -151,5 +206,19 @@ export class BasketEntity {
     })
 
     return isValid
+  }
+
+  public get getPrice(): IBasketPrice {
+    const totalPrice = this.items.reduce((acc, el) => acc + (el.product.totalPrice * el.count), 0)
+    const fullPrice = this.items.reduce((acc, el) => acc + (el.product.price * el.count), 0)
+
+    const result = {
+      totalPrice,
+      fullPrice,
+      discount: fullPrice - totalPrice,
+    }
+
+    this.price = result
+    return result
   }
 }

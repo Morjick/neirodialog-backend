@@ -1,9 +1,13 @@
 import { UserRoleType } from "../database/models/UserModel"
 import { ProductModel } from "../database/models/products/ProductModel"
+import { PromocodeModel } from "../database/models/products/PromocodeModel"
 import { DillerEntity } from "../entities/DillerEntity"
 import { IUserModel, UserEntity } from "../entities/UserEntity"
 import { ProductEntity, TProductType } from "../entities/products/ProductEntity"
+import { ICreatePromocode, PromocodeEntity } from "../entities/products/PromocodeEntity"
 import { SectionEntity } from "../entities/products/SectionEntity"
+
+export type TPromocodeStatus = 'active' | 'deactive' | 'all'
 
 export interface IProductFilters {
   type?: TProductType | 'any'
@@ -20,6 +24,10 @@ export interface IGetProductsOptions {
   filters?: IProductFilters
 }
 
+export interface IPromocodesOptions {
+  status?: TPromocodeStatus
+}
+
 const defaultFilters: IProductFilters = {
   type: 'any',
   search: '',
@@ -32,13 +40,17 @@ const defaultFilters: IProductFilters = {
 export class ProductReposity {
   public list: ProductEntity[] = []
   public showedProducts: ProductEntity[] = []
+  public promocodes: PromocodeEntity[] = []
 
   constructor () {}
 
   async buildReposity () {
-    const products = await ProductModel.findAll()
+    const [products, promocodes] = await Promise.all([
+      await ProductModel.findAll({ attributes: ['id'] }),
+      await PromocodeModel.findAll({ attributes: ['id'] }),
+    ])
 
-    await Promise.all(
+    await Promise.all([
       products.map(async (el) => {
         const product = new ProductEntity()
         await product.findByID(el.dataValues.id)
@@ -48,8 +60,17 @@ export class ProductReposity {
         if (product.isShow) {
           this.showedProducts.push(product)
         }
-      })
-    )
+      }),
+      promocodes.map(async (el) => {
+        const promocode = new PromocodeEntity()
+
+        promocode.emitter.on('init', (element) => {
+          this.promocodes.push(element)
+        })
+
+        await promocode.findByID(el.dataValues.id)
+      }),
+    ])
 
     console.log('Product Reposity init')
     return this
@@ -194,5 +215,42 @@ export class ProductReposity {
     if (role === 'MODERATOR' || role === 'USER') return this.showedProducts
 
     return this.showedProducts
+  }
+
+  getPromocodes (options: IPromocodesOptions) {
+    this.promocodes = this.promocodes.filter((el) => Boolean(el))
+    let promo = []
+
+    if (options.status == 'active') {
+      promo = this.promocodes.filter((el) => el.isActive)
+    } else if (options.status == 'deactive') {
+      promo = this.promocodes.filter((el) => !el.isActive)
+    } else {
+      promo = this.promocodes
+    }
+
+    return promo
+  }
+
+  public getProductByID (id: number) {
+    const product = this.list.find(el => el.id == id)
+
+    return product || null
+  }
+
+  async createPromocode (body: ICreatePromocode) {
+    const promocode = new PromocodeEntity()
+    const result = await promocode.create(body)
+
+    this.promocodes.push(promocode)
+
+    return result
+  }
+
+  async deleteProduct (id: number) {
+    this.list = this.list.filter((el) => el.id !== id)
+    this.showedProducts = this.showedProducts.filter((el) => el.id !== id)
+
+    return await ProductEntity.delete(id)
   }
 }

@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import { ProductModel } from "~/data/database/models/products/ProductModel"
 import { IUserModel, IUserOpenData, UserEntity } from "../UserEntity"
 import { DillerEntity } from "../DillerEntity"
@@ -6,6 +7,7 @@ import getTransplit from "~/libs/getTranslate"
 import { SectionEntity } from "./SectionEntity"
 import { CommentEntity } from "./CommentEntity"
 import { GlobalReposities, IGlobalReposisies } from "~/data/reposityes"
+import { DocumentModel, IDocumentModel } from '~/data/database/models/documents/Document'
 
 export type TProductType = 'electronic' | 'physical'
 
@@ -37,6 +39,7 @@ export interface IProductModel {
   diller: DillerEntity
   tags: string[]
   commentsID: number[]
+  documentsID: number[]
 }
 
 const reposities: IGlobalReposisies = GlobalReposities
@@ -66,8 +69,14 @@ export class ProductEntity {
   commentsID: number[]
   section: SectionEntity = null
   comments: CommentEntity[]
+  documentsID: number[] = []
+  documents: IDocumentModel[] = []
 
-  constructor () {}
+  public emitter = null
+
+  constructor () {
+    this.emitter = new EventEmitter()
+  }
 
   async findByID (productID: number) {
     const response = await ProductModel.findByPk(productID)
@@ -81,12 +90,19 @@ export class ProductEntity {
     const Diller = new DillerEntity()
     await Diller.getFromID(this.dillerID)
 
-    this.totalPrice = this.discount ? this.price - (this.price / this.discount * 100) : this.price
+    this.totalPrice = this.discount ? (this.price - (this.price * this.discount / 100)) : this.price
     this.autor = await Autor.getAutor()
     this.diller = Diller
     this.features = JSON.parse(product.features)
     this.commentsID = product.commentsID || []
     this.comments = []
+
+    this.documentsID = product.documentsID || []
+    this.documents = await Promise.all(
+      this.documentsID.map(async (documentID) => {
+        return (await DocumentModel.findByPk(documentID)).dataValues
+      })
+    )
 
     this.commentsID.forEach((item) => {
       const comment = new CommentEntity()
@@ -97,8 +113,10 @@ export class ProductEntity {
       this.comments.push(comment)
     })
 
-    if (this.sectionID) {
+    try {
       this.section = reposities.sections.getList().find((el) => el.id == this.sectionID)
+    } catch {
+      this.section = null
     }
   }
 
@@ -135,6 +153,7 @@ export class ProductEntity {
         dillerID: diller.id,
         discount: data.discount || 0,
         isShow: data.isShow || false,
+        documentsID: data.documentsID || [],
       })
   
       return {
@@ -180,6 +199,23 @@ export class ProductEntity {
     return {
       status: 201,
       message: comment.status == 'published' ? 'Комментарий был опубликован' : 'Комментарий отправлен на модерацию',
+    }
+  }
+
+  public static async delete (id: number) {
+    try {
+      await ProductModel.destroy({ where: { id } })
+
+      return {
+        status: 200,
+        message: 'Продукт был удалён',
+      }
+    } catch (e) {
+      return {
+        status: 501,
+        message: 'Ошибка при удалении продукта',
+        error: e,
+      }
     }
   }
 }
