@@ -4,6 +4,7 @@ import { NewsReposity } from "./news.reposity"
 import { ProductReposity } from "./product.reposity"
 import { SectionReposity } from "./section.reposity"
 import { OrderReposity } from './orders.reposity'
+import { CommentReposity } from './comments.reposity'
 
 export interface IGlobalReposisies {
   diller: DillerReposity
@@ -12,6 +13,7 @@ export interface IGlobalReposisies {
   news: NewsReposity
   users: UserReposity
   orders: OrderReposity
+  comments: CommentReposity
 }
 
 
@@ -21,7 +23,8 @@ export const GlobalReposities: IGlobalReposisies = {
   sections: null,
   news: null,
   users: null,
-  orders: null
+  orders: null,
+  comments: null,
 }
 
 export const createReposities = async () => {
@@ -31,10 +34,12 @@ export const createReposities = async () => {
   const newsReposity = new NewsReposity()
   const userReposity = new UserReposity()
   const orderReposity = new OrderReposity()
+  const commentReposity = new CommentReposity()
 
   GlobalReposities.users = await userReposity.init()
   GlobalReposities.diller = await dillerReposity.init()
   GlobalReposities.sections = await sections.init()
+  GlobalReposities.comments = await commentReposity.init()
   GlobalReposities.products = await productReposity.buildReposity()
   GlobalReposities.news  = await newsReposity.init()
   GlobalReposities.orders = await orderReposity.buildReposity()
@@ -68,5 +73,9 @@ export class Reposity {
 
   static get global () {
     return GlobalReposities
+  }
+
+  static get comments () {
+    return GlobalReposities.comments
   }
 }

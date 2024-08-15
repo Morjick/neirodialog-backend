@@ -1,17 +1,19 @@
-import { createExpressServer } from 'routing-controllers'
 import 'dotenv/config'
+import * as path from 'path'
 import compression from 'compression'
+import swagger from 'swagger-ui-express'
+import GlobalDocs from './data/docs/global.docs.json'
+import fs from 'fs'
+
+import { createExpressServer } from 'routing-controllers'
 import { UserController } from './controllers/UserController'
 import { GlobalResponseInterceptor } from './data/interceptors/GlobalResponseInterceptor'
 import { ProductsController } from './controllers/ProductsController'
 import { startNeirodialogDataBase } from './data/database'
 import { createReposities } from './data/reposityes'
 import { NewsController } from './controllers/NewsController'
-import swagger from 'swagger-ui-express'
-import GlobalDocs from './data/docs/global.docs.json'
 import { AppControlelr } from './controllers/AppController'
 import { StaticControlelr } from './controllers/StaticController'
-import * as path from 'path'
 import { OrderControlelr } from './controllers/OrderController'
 
 const startServer = async () => {
@@ -44,9 +46,7 @@ const startServer = async () => {
 
     await createReposities()
 
-    const swaggerOptions = {
-      explorer: true,
-    }
+    const swaggerOptions = { explorer: true }
     
     app.use('/api-docs', swagger.serve, swagger.setup(GlobalDocs, swaggerOptions))
 
@@ -74,6 +74,13 @@ const startServer = async () => {
     app.listen(port)
 
   } catch (e) {
+    const date = new Date().toLocaleString('ru')
+    const error = new Error(e)
+
+    const filename = `${date}-${error.name}.txt`
+
+    fs.writeFileSync(`/data/static/logs/${filename}`, error.message)
+
     console.log('server error: ', e)
   }
 }

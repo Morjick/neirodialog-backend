@@ -7,11 +7,8 @@
     "build": "npx tsc",
     "start": "node dist/app.js",
     "dev": "nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --exec \"ts-node src/app.ts\"",
-    "prestart": "npm run build",
-    "server:watch": "ts-node-dev --respawn --transpile-only src/index.ts",
     "lint:fix": "eslint --cache --ext .ts . --fix",
-    "lint": "eslint --cache --ext .ts .",
-    "perttier": "npx prettier . --write"
+    "lint": "eslint --cache --ext .ts ."
   },
   "author": "Morjick <matvey-khramov@inbxo.ru>",
   "license": "ISC",
@@ -33,6 +30,8 @@
   },
   "dependencies": {
     "@types/cors": "^2.8.17",
+    "@types/socket.io": "^3.0.2",
+    "@typescript-eslint/typescript-estree": "^8.1.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "class-transformer": "^0.5.1",
