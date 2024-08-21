@@ -15,10 +15,14 @@ import { NewsController } from './controllers/NewsController'
 import { AppControlelr } from './controllers/AppController'
 import { StaticControlelr } from './controllers/StaticController'
 import { OrderControlelr } from './controllers/OrderController'
+import { SocketControllers } from 'socket-controllers'
+import { ModerationController } from './controllers/ModerationController'
+import Container from 'typedi'
 
 const startServer = async () => {
   try {
     const port = process.env.PORT
+    const socketPort = Number(process.env.SOCKET_PORT)
 
     const app = createExpressServer({
       controllers: [UserController, ProductsController, NewsController, AppControlelr, StaticControlelr, OrderControlelr],
@@ -34,6 +38,12 @@ const startServer = async () => {
       },
       classTransformer: true,
       validation: true,
+    })
+
+    new SocketControllers({
+      port: socketPort,
+      controllers: [ModerationController],
+      container: Container,
     })
 
     await startNeirodialogDataBase({
@@ -67,7 +77,7 @@ const startServer = async () => {
       }
     })
 
-    console.log(`Server has been started on PORT - ${port}`)
+    console.log(`Server has been started on PORT - ${port}, socket port: ${socketPort}`)
 
     app.use(compression())
 

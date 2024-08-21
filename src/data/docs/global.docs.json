@@ -469,6 +469,112 @@
         ]
       }
     },
+    "products/update-product/:id": {
+      "patch": {
+        "x-swagger-router-controller": "home",
+        "operationId": "update-products",
+        "tags": ["Products"],
+        "description": "Изменить продукт",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "price",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "countInStock",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "discount",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "avatar",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "images",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "videos",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "sectionID",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "autorID",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "dillerID",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "isShow",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "tags",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "documentsID",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          }
+        ]
+      }
+    },
     "products/get-products": {
       "get": {
         "x-swagger-router-controller": "home",

@@ -15,6 +15,8 @@ export class CommentReposity {
 
     this.products = productComments
 
+    console.log(`Comment reposity init`)
+
     return this
   }
 

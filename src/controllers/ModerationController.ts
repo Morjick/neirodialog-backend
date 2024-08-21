@@ -38,7 +38,7 @@ export class ModerationController {
 
       socket.handshake.auth = data.user
 
-      socket.emit('update-data', JSON.stringify({
+      socket.emit('update', JSON.stringify({
         comments: this.products,
       }))
     } catch (e) {

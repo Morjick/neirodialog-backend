@@ -6,10 +6,12 @@ import { CreateCommentContract, CreateProductContract } from "~/data/contracts/p
 import getTransplit from "~/libs/getTranslate"
 import { SectionEntity } from "./SectionEntity"
 import { CommentEntity } from "./CommentEntity"
-import { GlobalReposities, IGlobalReposisies } from "~/data/reposityes"
 import { DocumentModel, IDocumentModel } from '~/data/database/models/documents/Document'
+import { Reposity } from '~/data/reposityes'
+import { IResponse } from '~/data/interfaces'
 
 export type TProductType = 'electronic' | 'physical'
+type TProductEmitterAction = 'update'
 
 export interface IProductFeatures {
   weight: number
@@ -41,8 +43,6 @@ export interface IProductModel {
   commentsID: number[]
   documentsID: number[]
 }
-
-const reposities: IGlobalReposisies = GlobalReposities
 
 export class ProductEntity {
   id: number
@@ -114,7 +114,7 @@ export class ProductEntity {
     })
 
     try {
-      this.section = reposities.sections.getList().find((el) => el.id == this.sectionID)
+      this.section = Reposity.sections.getList().find((el) => el.id == this.sectionID)
     } catch {
       this.section = null
     }
@@ -147,6 +147,8 @@ export class ProductEntity {
       const product = await ProductModel.create({
         slug,
         name: data.name,
+        description: data.description,
+        body: data.body,
         type: data.type,
         price: data.price,
         autorID: user.id,
@@ -154,6 +156,13 @@ export class ProductEntity {
         discount: data.discount || 0,
         isShow: data.isShow || false,
         documentsID: data.documentsID || [],
+        countInStock: data.countInStock || 0,
+        features: JSON.stringify(data.features || {}),
+        avatar: data.avatar,
+        images: data.images || [],
+        videos: data.videos || [],
+        sectionID: data.sectionID,
+        tags: data.tags || [],
       })
   
       return {
@@ -176,6 +185,45 @@ export class ProductEntity {
         status: 501,
         message: 'При создании продукта произошла ошибка',
         error: e
+      }
+    }
+  }
+
+  async update (data: CreateProductContract, diller: DillerEntity, user: IUserModel): Promise<IResponse<any>> {
+    try {
+      const isDillerAccessed = diller.accessUser(user.id)
+      if (!isDillerAccessed) return {
+        status: 402,
+        message: 'Не удалось подтвердить принадлежность к диллеру',
+        error: 'PermissionDied'
+      }
+
+      const isProductNotFount = await ProductModel.findByPk(this.id)
+      if (!isProductNotFount) return {
+        status: 404,
+        message: 'Продукт не найден',
+        error: 'NotFound'
+      }
+  
+      await ProductModel.update(
+        { ...data, features: JSON.stringify(data.features || {}) },
+        { where: { id: this.id }
+      })
+  
+      await this.findByID(this.id)
+  
+      this.emit('update', this)
+  
+      return {
+        status: 200,
+        message: 'Продукт был изменён',
+        body: {},
+      }
+    } catch (e) {
+      return {
+        status: 501,
+        message: e,
+        error: 'Unexeption'
       }
     }
   }
@@ -217,5 +265,11 @@ export class ProductEntity {
         error: e,
       }
     }
+  }
+
+  private emit (actions: TProductEmitterAction, body: any) {
+    if (!body) return
+
+    this.emitter.emit(actions, body)
   }
 }

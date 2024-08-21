@@ -1,4 +1,4 @@
-import { Body, Delete, Get, JsonController, Params, Post, QueryParams, Req, UseBefore } from "routing-controllers"
+import { Body, Delete, Get, JsonController, Params, Patch, Post, QueryParams, Req, UseBefore } from "routing-controllers"
 import {
   AddToCartContract,
   ChangeSectionForProductContract,
@@ -121,6 +121,30 @@ export class ProductsController {
     const { id } = params
 
     return await this.reposities.products.deleteProduct(id)
+  }
+
+  @Patch('/update-product/:id')
+  @UseBefore(DillerMiddleware)
+  async updateProduct (@Params() params, @Req() request, @Body() body: CreateProductContract) {
+    try {
+      const id = params.id
+      const user: IUserModel = request.user
+      const diller: DillerEntity = request.diller
+
+      if (!diller || !id) return {
+        status: 301,
+        message: 'Не удалось установить диллера или найти продукт',
+        error: 'Invalid'
+      }
+
+      return await Reposity.products.updateProduct(body, diller, user, id)
+    } catch (e) {
+      return {
+        status: 501,
+        message: 'Не удалось изменить продукт',
+        error: 'Unexeption'
+      }
+    }
   }
 
   @Get('/get-products')

@@ -1,3 +1,4 @@
+import { CreateProductContract } from "../contracts/product.contracts"
 import { UserRoleType } from "../database/models/UserModel"
 import { ProductModel } from "../database/models/products/ProductModel"
 import { PromocodeModel } from "../database/models/products/PromocodeModel"
@@ -54,6 +55,14 @@ export class ProductReposity {
       products.map(async (el) => {
         const product = new ProductEntity()
         await product.findByID(el.dataValues.id)
+
+        product.emitter.on('update', (product: ProductEntity) => {
+          if (!product) return
+
+          const productIndex = this.list.findIndex((el) => el.id == product.id)
+
+          this.list[productIndex] = product
+        })
   
         this.list.push(product)
   
@@ -252,5 +261,11 @@ export class ProductReposity {
     this.showedProducts = this.showedProducts.filter((el) => el.id !== id)
 
     return await ProductEntity.delete(id)
+  }
+
+  async updateProduct (data: CreateProductContract, diller: DillerEntity, user: IUserModel, productID: number) {
+    const product = this.list.find(el => el.id == productID)
+
+    return await product.update(data, diller, user)
   }
 }
