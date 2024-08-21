@@ -173,7 +173,8 @@ export class ProductsController {
 
   @Get('/get-products/:slug')
   async getProductItem (@Params() params, @Req() request) {
-    const product = this.reposities.products.findProduct(params.slug)
+    const response = this.reposities.products.findProduct(params.slug)
+    const product = response.product
 
     if (!product || !product.isShow) {
       const user: UserEntity = request.user
@@ -183,9 +184,7 @@ export class ProductsController {
           status: 200,
           message: 'Вам продукт показан, но для остальных пользователей он скрыт',
           toast: 'warning',
-          body: {
-            product,
-          }
+          body: response,
         }
       }
 
@@ -199,9 +198,7 @@ export class ProductsController {
     return {
       status: 200,
       message: 'Продукты получены',
-      body: {
-        product,
-      }
+      body: response,
     }
   }
 
@@ -260,7 +257,7 @@ export class ProductsController {
   @UseBefore(AuthMiddleware)
   async addToCart (@Req() request, @Body() body: AddToCartContract) {
     const user = this.reposities.users.findByID(request.user.id)
-    const product = this.reposities.products.findProduct(body.slug)
+    const { product } = this.reposities.products.findProduct(body.slug)
 
     if (!product) return {
       status: 404,

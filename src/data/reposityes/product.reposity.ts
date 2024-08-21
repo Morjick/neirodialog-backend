@@ -29,6 +29,18 @@ export interface IPromocodesOptions {
   status?: TPromocodeStatus
 }
 
+interface IOtherProducts {
+  title: string
+  description: string
+  list: ProductEntity[]
+  href: string
+}
+
+export interface IProductDetailsResponse {
+  product: ProductEntity
+  other: IOtherProducts[]
+}
+
 const defaultFilters: IProductFilters = {
   type: 'any',
   search: '',
@@ -205,8 +217,50 @@ export class ProductReposity {
     }
   }
 
-  findProduct (slug: string) {
-    return this.list.find(item => item.slug === slug)
+  findProduct (slug: string): IProductDetailsResponse {
+    const product = this.list.find(item => item.slug === slug)
+
+    const other: IOtherProducts[] = []
+
+    const dillerProducts = this.publicList
+      .filter(el => el.dillerID == product.dillerID)
+      .filter((el, index) => index <= 5)
+
+    const similarProducts = this.publicList
+      .filter((el) => {
+        if (el.sectionID == product.sectionID && el.type == product.type) return el
+
+        const tags = el.tags || []
+        let isIncludesTag = false
+        tags.forEach((tag) => {
+          const isInclude = product.tags.includes(tag)
+          if (isInclude) isIncludesTag = true
+        })
+
+        if (isIncludesTag) return el
+
+        return null
+      })
+      .filter(el => Boolean(el))
+      .filter((el, index) => index <= 5)
+
+    other.push({
+      title: 'Другие продукты от того же продавца',
+      description: `Продукты от ${product.diller.name}`,
+      href: `dillerIDs=[${product.dillerID}]`,
+      list: dillerProducts,
+    })
+    other.push({
+      title: 'Похожие продукты',
+      description: `Мы постарались подобрать для вас похожие продукты`,
+      href: `type=${product.type}`,
+      list: similarProducts,
+    })
+
+    return {
+      product,
+      other,
+    }
   }
 
   findProductByID (id: number) {
@@ -267,5 +321,9 @@ export class ProductReposity {
     const product = this.list.find(el => el.id == productID)
 
     return await product.update(data, diller, user)
+  }
+
+  public get publicList () {
+    return this.list.filter((el) => el.isShow)
   }
 }
