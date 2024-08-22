@@ -14,7 +14,6 @@ export class UserReposity {
       users.map(async (el) => {
         const User = new UserEntity({ userID: el.dataValues.id })
         await User.findUserForID()
-        // await User.initCart()
   
         this.list.push(User)
       })
@@ -30,5 +29,12 @@ export class UserReposity {
 
   getList () {
     return this.list
+  }
+
+  public async addUserToList (userID: number) {
+    const User = new UserEntity({ userID: userID })
+    await User.findUserForID()
+
+    this.list.push(User)
   }
 }

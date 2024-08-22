@@ -18,6 +18,7 @@ import { OrderControlelr } from './controllers/OrderController'
 import { SocketControllers } from 'socket-controllers'
 import { ModerationController } from './controllers/ModerationController'
 import Container from 'typedi'
+import { DillerController } from './controllers/DillerController'
 
 const startServer = async () => {
   try {
@@ -25,7 +26,7 @@ const startServer = async () => {
     const socketPort = Number(process.env.SOCKET_PORT)
 
     const app = createExpressServer({
-      controllers: [UserController, ProductsController, NewsController, AppControlelr, StaticControlelr, OrderControlelr],
+      controllers: [UserController, ProductsController, NewsController, AppControlelr, StaticControlelr, OrderControlelr, DillerController],
       interceptors: [GlobalResponseInterceptor],
       cors: {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

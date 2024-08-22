@@ -1,4 +1,4 @@
-export type TErrorType = 'Unauthorized' | 'Unexepted' | 'PermissionDied' | 'NotFound'
+export type TErrorType = 'Unauthorized' | 'Unexepted' | 'PermissionDied' | 'NotFound' | 'Invalid' | 'IsExist' | 'BadRequest'
 export type TToastType = 'warning' | 'error' | 'cool'
 
 export interface IResponseError {

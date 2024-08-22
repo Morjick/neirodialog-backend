@@ -1,3 +1,4 @@
+import { IDillerRolePermission, IRolePermissions, Permissions } from "~/libs/Permissions"
 import { UserModel, UserRoleType } from "../database/models/UserModel"
 import { BasketEntity, IBasketItemModel } from "./user/BasketEntity"
 
@@ -33,6 +34,8 @@ export class UserEntity {
   private user: IUserModel = null
   private basketID: number
   private basket: BasketEntity
+  private permissions: IRolePermissions = null
+  private dillerPermissions: IDillerRolePermission = null
 
   constructor (data: IUserEntityConstructor) {
     this.id = data.userID
@@ -47,6 +50,8 @@ export class UserEntity {
       const user = await UserModel.findOne({ where: { id: this.id } })
       this.user = user.dataValues
       this.basketID = this.user.basketID
+
+      this.permissions = Permissions.getRolePermissions(this.user.role || 'USER')
       
       return this.user
     } catch (e) {
@@ -119,5 +124,9 @@ export class UserEntity {
     
     this.basket.getPrice
     return this.basket
+  }
+
+  public get rolePermissions () {
+    return this.permissions
   }
 }

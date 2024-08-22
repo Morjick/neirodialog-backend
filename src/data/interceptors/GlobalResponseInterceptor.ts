@@ -3,6 +3,7 @@ import {
   InterceptorInterface,
   Action,
 } from 'routing-controllers'
+import { IResponseError } from '../interfaces'
 
 interface ContentInterface {
   status: number
@@ -10,6 +11,7 @@ interface ContentInterface {
   message?: string
   error?: string
   file?: string
+  exeption?: IResponseError
 }
 
 @Interceptor()
@@ -27,6 +29,7 @@ export class GlobalResponseInterceptor implements InterceptorInterface {
       statusCode: content.status || 501,
       message: content.message,
       body: content.body,
+      exeption: content.exeption || null,
       error: content.error?.length
         ? content.error
         : content.status >= 300

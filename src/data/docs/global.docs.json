@@ -296,73 +296,6 @@
         "description": "Удалить раздел"
       }
     },
-    "products/create-diller": {
-      "post": {
-        "x-swagger-router-controller": "home",
-        "operationId": "create-diller",
-        "tags": ["Products"],
-        "description": "Создать продавца",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "json",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "email",
-            "in": "json",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "avatar",
-            "in": "json",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "directorID",
-            "in": "json",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "name": "productTypePermission",
-            "in": "json",
-            "required": true,
-            "type": "string",
-            "enum": ["physical", "electronic", "any"]
-          },
-          {
-            "name": "availableProductsCount",
-            "in": "json",
-            "required": false,
-            "type": "number"
-          },
-          {
-            "name": "availableCommandLength",
-            "in": "json",
-            "required": false,
-            "type": "number"
-          },
-          {
-            "name": "description",
-            "in": "json",
-            "required": false,
-            "type": "number"
-          }
-        ]
-      }
-    },
-    "products/get-dillers": {
-      "get": {
-        "x-swagger-router-controller": "home",
-        "operationId": "get-dillers",
-        "tags": ["Products"],
-        "description": "Получить список продавцов"
-      }
-    },
     "products/create-product": {
       "post": {
         "x-swagger-router-controller": "home",
@@ -738,6 +671,138 @@
           "description": "Получить список промокодов",
           "parameters": []
         }
+    },
+    "dillers/create-diller": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-diller",
+        "tags": ["Dillers"],
+        "description": "Создать продавца",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "directorID",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "productTypePermission",
+            "in": "json",
+            "required": true,
+            "type": "string",
+            "enum": ["physical", "electronic", "any"]
+          },
+          {
+            "name": "availableProductsCount",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "availableCommandLength",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          }
+        ]
+      }
+    },
+    "dillers/get-dillers": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-dillers",
+        "tags": ["Dillers"],
+        "description": "Получить список продавцов"
+      }
+    },
+    "dillers/update-diller": {
+      "patch": {
+        "x-swagger-router-controller": "home",
+        "operationId": "update-diller",
+        "tags": ["Dillers"],
+        "description": "Изменить диллера",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "adminsID",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "managersID",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "productTypePermission",
+            "in": "json",
+            "required": false,
+            "type": "string",
+            "enum": ["physical", "electronic", "any"]
+          },
+          {
+            "name": "availableProductsCount",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "availableCommandLength",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          }
+        ]
+      }
     },
     "news/get-news": {
       "get": {

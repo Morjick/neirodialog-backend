@@ -15,11 +15,10 @@ import * as bcrypt from 'bcrypt'
 import * as jwt from 'jsonwebtoken'
 import { checkToken } from '../libs/checkToken'
 import { AuthMiddleware } from '~/middleware/auth.middleware'
-import { GlobalReposities, IGlobalReposisies } from '~/data/reposityes'
+import { Reposity } from '~/data/reposityes'
 
 @JsonController('/user')
 export class UserController {
-  public reposities: IGlobalReposisies = GlobalReposities
   
   @Post('/create-user')
   async createUser (@Body() userform: CreateUserContracts) {
@@ -48,6 +47,8 @@ export class UserController {
       password: hashPassword,
       firstname: userform.firstname,
     })
+
+    await Reposity.users.addUserToList(user.dataValues.id)
 
     const token: string = await jwt.sign(
       {
@@ -128,7 +129,7 @@ export class UserController {
   @Get('/get-cart')
   @UseBefore(AuthMiddleware)
   async getBasket (@Req() request) {
-    const user = this.reposities.users.findByID(request.user.id)
+    const user = Reposity.users.findByID(request.user.id)
     const cart = await user.getBasket()
 
     return {

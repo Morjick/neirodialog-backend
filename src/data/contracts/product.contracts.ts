@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsNumber, IsString, Max, MaxLength, Min, MinLength } from "class-validator"
-import { TDillerProductTypePermission } from "../entities/DillerEntity"
+import { TCommandAction, TDillerProductTypePermission, TDillerUserRole } from "../entities/DillerEntity"
 import { IProductFeatures, TProductType } from "../entities/products/ProductEntity"
 
 export class CreateProductSectionContract {
@@ -31,6 +31,29 @@ export class CreateDillerContract {
   description?: string
 
   avatar?: string
+}
+
+export class UpdateDillerContract {
+  name: string
+  email: string
+  description?: string
+  availableProductsCount?: number
+  availableCommandLength?: number
+  productTypePermission: TDillerProductTypePermission
+  avatar: string
+  adminsID: number[]
+  managersID: number[]
+}
+
+export class UpdateCommandContract {
+  @IsNumber({}, { message: 'Укажите ID пользователя (число)' })
+  userID: number
+
+  @IsNotEmpty({message: 'Поле role является обязательным'})
+  role: TDillerUserRole
+
+  @IsNotEmpty({message: 'Поле action является обязательным'})
+  action: TCommandAction
 }
 
 export class CreateProductContract {
