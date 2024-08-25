@@ -173,6 +173,28 @@ export class OrderReposity {
     await order.findByID(id)
   }
 
+  public getPersonalList (userID: number): OrderEntity[] {
+    const list = this.list.filter((el) => el.userID == userID)
+
+    return list || []
+  }
+
+  public getUserLibrary (userID: number): OrderItemEntity[] {
+    const library = []
+
+    const userOrders = this.getPersonalList(userID)
+
+    userOrders.forEach((order) => {
+      order.items.forEach((item) => {
+        if (item.productType == 'electronic' && item.status == 'sent') {
+          library.push(item)
+        }
+      })
+    })
+
+    return library
+  }
+
   private processingOrder (order: OrderEntity) {
     order.items.forEach(async (item) => {
       if (item.productType !== 'electronic') return

@@ -157,6 +157,62 @@
         "description": "Получить файл"
       }
     },
+    "user/profile": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-profile",
+        "tags": ["User"],
+        "description": "Получить профиль пользователя"
+      }
+    },
+    "user/get-user/:id": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-user",
+        "tags": ["User"],
+        "description": "Получить данные о пользователе"
+      }
+    },
+    "user/update-user/:id": {
+      "patch": {
+        "x-swagger-router-controller": "home",
+        "operationId": "update-user",
+        "tags": ["User"],
+        "description": "Изменить пользователя",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "firstname",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "lastname",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "phone",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "avatar",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
     "static/upload-file": {
       "post": {
         "x-swagger-router-controller": "home",

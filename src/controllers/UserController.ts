@@ -1,7 +1,7 @@
 import { secretKey } from './../data/database/index'
 import { createRandomString } from '../libs/createRandomString'
 import { UserModel } from '../data/database/models/UserModel'
-import { CreateUserContracts, LoginUserContract } from './../data/contracts/user.contracts'
+import { CreateUserContracts, LoginUserContract, UpdateUserContracts } from './../data/contracts/user.contracts'
 import {
   JsonController,
   Body,
@@ -9,6 +9,8 @@ import {
   Get,
   UseBefore,
   Req,
+  Params,
+  Patch,
 } from 'routing-controllers'
 import { IsValidPassword } from '../libs/isValidVassword'
 import * as bcrypt from 'bcrypt'
@@ -16,6 +18,9 @@ import * as jwt from 'jsonwebtoken'
 import { checkToken } from '../libs/checkToken'
 import { AuthMiddleware } from '~/middleware/auth.middleware'
 import { Reposity } from '~/data/reposityes'
+import { IResponse } from '~/data/interfaces'
+import { IUserModel } from '~/data/entities/UserEntity'
+import { AdminMiddleware } from '~/middleware/admin.middleware'
 
 @JsonController('/user')
 export class UserController {
@@ -137,6 +142,125 @@ export class UserController {
       message: 'Корзина получена',
       body: {
         cart,
+      }
+    }
+  }
+
+  @Get('/profile')
+  @UseBefore(AuthMiddleware)
+  async getProfile (@Req() request): Promise<IResponse<any>> {
+    try {
+      const user: IUserModel = request.user
+      const profile = Reposity.users.getProfile(user.id)
+      
+      return {
+        status: 200,
+        message: 'Профиль получен',
+        body: {
+          profile: profile,
+        }
+      }
+    } catch (error) {
+      return {
+        status: 501,
+        message: 'Неожиданная ошибка сервера',
+        error: new Error(error),
+        exeption: {
+          type: 'Unexepted',
+          message: new Error(error).message,
+        }
+      }
+    }
+  }
+
+  @Get('/get-user/:id')
+  @UseBefore(AdminMiddleware)
+  async getUser (@Req() request, @Params() params): Promise<IResponse<any>> {
+    try {
+      const { id } = params
+
+      if (!id) return {
+        status: 301,
+        message: 'Не корректный запрос',
+        exeption: {
+          type: 'Invalid',
+          message: 'Have not param "id" in request'
+        }
+      }
+
+      const adminModel: IUserModel = request.user
+      const admin = Reposity.users.findByID(adminModel.id)
+
+      if (!admin.rolePermissions.user.includes('read')) return {
+        status: 301,
+        message: 'Вы не имеете доступ к просмотру пользователей',
+        exeption: {
+          type: 'PermissionDied',
+          message: 'Have not permission "read" in users permissions'
+        }
+      }
+
+      const user = Reposity.users.findByID(id)
+
+      return {
+        status: 200,
+        message: 'Пользователь получен',
+        body: {
+          user,
+          profile: user.profile,
+          permissions: user.rolePermissions,
+        },
+      }
+    } catch (error) {
+      return {
+        status: 501,
+        message: 'Не удалось получить пользователя',
+        error: new Error(error),
+        exeption: {
+          message: new Error(error).message,
+          type: 'Unexepted'
+        }
+      }
+    }
+  }
+
+  @Patch('/update-user/:id')
+  @UseBefore(AuthMiddleware)
+  async updateUser (@Req() request, @Params() params, @Body() body: UpdateUserContracts): Promise<IResponse<any>> {
+    try {
+      const { id } = params
+      const userModel: IUserModel = request.user
+  
+      if (!id || !userModel) return {
+        status: 301,
+        message: 'Не корректный запрос',
+        exeption: {
+          message: 'Invalid params in request',
+          type: 'Invalid'
+        }
+      }
+
+      const user = Reposity.users.findByID(userModel.id)
+
+      if (user.id !== id && !user.rolePermissions.user.includes('update')) return {
+        status: 301,
+        message: 'Не удалось обновить пользователя',
+        exeption: {
+          type: 'Unexepted',
+          message: 'Have not permission'
+        }
+      }
+
+      return await Reposity.users.updateUser(body, id)
+    } catch (error) {
+      return {
+        status: 501,
+        message: 'Не удалось обновить пользователя',
+        error: new Error(error),
+        exeption: {
+          type: 'Unexepted',
+          message: new Error().message,
+        }
       }
     }
   }

@@ -1,6 +1,14 @@
-import { IDillerRolePermission, IRolePermissions, Permissions } from "~/libs/Permissions"
+import { EventEmitter } from 'events'
+import { IRolePermissions, Permissions } from "~/libs/Permissions"
 import { UserModel, UserRoleType } from "../database/models/UserModel"
 import { BasketEntity, IBasketItemModel } from "./user/BasketEntity"
+import { OrderEntity } from "./orders/OrderEntity"
+import { OrderItemEntity } from "./orders/OrderItemEntity"
+import { Reposity } from "../reposityes"
+import { UpdateUserContracts } from '../contracts/user.contracts'
+import { IResponse } from '../interfaces'
+
+export type TEmitterAction = 'update'
 
 export interface IUserEntityConstructor {
   userID: number
@@ -28,6 +36,13 @@ export interface IUserOpenData {
   hash: string
 }
 
+export interface IUserProfile {
+  user: IUserModel
+  orders: OrderEntity[]
+  basket: BasketEntity
+  library: OrderItemEntity[]
+}
+
 export class UserEntity {
   public id = 0
 
@@ -35,10 +50,12 @@ export class UserEntity {
   private basketID: number
   private basket: BasketEntity
   private permissions: IRolePermissions = null
-  private dillerPermissions: IDillerRolePermission = null
+
+  public emitter = null
 
   constructor (data: IUserEntityConstructor) {
     this.id = data.userID
+    this.emitter = new EventEmitter()
 
     this.findUserForID()
   }
@@ -126,7 +143,47 @@ export class UserEntity {
     return this.basket
   }
 
+  public async updateUser (body: UpdateUserContracts): Promise<IResponse<any>> {
+    try {
+      await UserModel.update({ ...body }, { where: { id: this.id } })
+      this.emit('update', this)
+  
+      return {
+        status: 200,
+        message: 'Данные о пользователе обновлены'
+      }
+    } catch (error) {
+      return {
+        status: 501,
+        message: 'Ошибка при попытке обновить пользователя',
+        error: new Error(error),
+        exeption: {
+          type: 'Unexepted',
+          message: new Error(error).message
+        }
+      }
+    }
+  }
+
+  public get profile (): IUserProfile {
+    const orders = Reposity.orders.getPersonalList(this.id)
+    const library = Reposity.orders.getUserLibrary(this.id)
+
+    return {
+      user: this.user,
+      basket: this.basket,
+      orders,
+      library,
+    }
+  }
+
   public get rolePermissions () {
     return this.permissions
+  }
+
+  private emit (action: TEmitterAction, body: any) {
+    if (!body) return
+
+    this.emitter.emit(action, body)
   }
 }
