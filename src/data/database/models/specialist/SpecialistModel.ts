@@ -19,6 +19,12 @@ export class SpecialistModel extends Model<ISpecialistModel> {
   @Column({ type: DataType.STRING })
   hash: string
 
+  @Column({ type: DataType.TEXT })
+  body: string
+
+  @Column({ type: DataType.TEXT })
+  description: string
+
   @Column({ type: DataType.INTEGER })
   userID: number
 

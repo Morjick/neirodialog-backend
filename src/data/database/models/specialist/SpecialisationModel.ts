@@ -18,6 +18,12 @@ export class SpecialisationModel extends Model<ISpecialisationModel> {
 
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
   name: string
+
+  @Column({ type: DataType.TEXT })
+  body: string
+
+  @Column({ type: DataType.TEXT })
+  description: string
   
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
   slug: string
@@ -27,4 +33,7 @@ export class SpecialisationModel extends Model<ISpecialisationModel> {
 
   @Column({ type: DataType.INTEGER, defaultValue: 100 })
   maxOld: number
+
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  autorID: number
 }

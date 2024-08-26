@@ -1,6 +1,10 @@
 import { SectionModel } from "../database/models/products/SectionModel"
 import { SectionEntity } from "../entities/products/SectionEntity"
 
+interface IGetSectionsOptions {
+  search: string
+}
+
 export class SectionReposity {
   list: SectionEntity[] = []
 
@@ -26,7 +30,11 @@ export class SectionReposity {
     return await SectionEntity.delete(id)
   }
 
-  getList () {
+  getList (options?: IGetSectionsOptions) {
+    const search = options?.search || ''
+
+    if (search) return this.list.filter((el) => el.name.includes(search))
+
     return this.list
   }
 

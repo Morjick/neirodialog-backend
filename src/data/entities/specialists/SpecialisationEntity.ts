@@ -1,5 +1,9 @@
+import { EventEmitter } from 'events'
 import { SpecialisationModel } from "~/data/database/models/specialist/SpecialisationModel"
+import { IResponse } from "~/data/interfaces"
 import getTransplit from "~/libs/getTranslate"
+
+type TSpecialisationAction = 'deleted' | 'update'
 
 export interface ISpecialisationModel {
   id: number
@@ -7,13 +11,25 @@ export interface ISpecialisationModel {
   slug: string
   minOld: number
   maxOld: number
+  autorID: number
 }
 
 export interface ICreateSpecialisation {
   name: string
+  description: string
+  body?: string
   minOld?: number
   maxOld?: number
-} 
+  autorID: number
+}
+
+export interface IUpdateSpecialisation {
+  name?: string
+  description?: string
+  body?: string
+  minOld?: number
+  maxOld?: number
+}
 
 export class SpecialisationEntity {
   id: number
@@ -21,31 +37,74 @@ export class SpecialisationEntity {
   slug: string
   minOld: number
   maxOld: number
+  autorID: number
 
-  constructor () {}
+  public emitter = null
 
-  async create (data: ICreateSpecialisation) {
+  constructor () {
+    this.emitter = new EventEmitter()
+  }
+
+  public async create (data: ICreateSpecialisation): Promise<IResponse<any>> {
     try {
-      this.minOld = data.minOld
-      this.maxOld = data.maxOld
+      if (!data.name || !data.autorID) return {
+        status: 301,
+        message: 'Не удалось создать специализацию',
+        exeption: {
+          type: 'Unexepted',
+          message: 'Have not param "name" or param "autorID" in request'
+        }
+      }
 
       const specialisation = {
         name: data.name,
-        minOld: this.minOld,
-        maxOld: this.maxOld,
-        slug: getTransplit(data.name)
+        autorID: data.autorID,
+        description: data.description,
+        body: data.body || '',
+        minOld: data.minOld || 0,
+        maxOld: data.maxOld || 200,
+        slug: getTransplit(data.name),
       }
 
       const result = await SpecialisationModel.create(specialisation)
 
+      await this.findByID(result.dataValues.id)
+
       return {
-        ok: true,
-        specialisation: result.dataValues,
+        status: 200,
+        message: 'Специализация создана',
+        body: {
+          specialisation: result.dataValues,
+        }
       }
-    } catch (e) {
+    } catch (error) {
       return {
-        ok: false,
-        error: e,
+        status: 501,
+        message: 'Не удалось создать специализацию',
+        error: new Error(error),
+        exeption: {
+          type: 'Unexepted',
+          message: new Error(error).message,
+        }
+      }
+    }
+  }
+
+  public async update (data: IUpdateSpecialisation): Promise<IResponse<any>> {
+    try {
+      await SpecialisationModel.update({ ...data }, { where: { id: this.id } })
+      await this.findByID(this.id)
+
+      this.emit('update', this)
+
+    } catch (error) {
+      return {
+        status: 501,
+        message: 'Не удалось обновить спецификацию',
+        exeption: {
+          type: 'Unexepted',
+          message: new Error(error).message
+        }
       }
     }
   }
@@ -59,5 +118,18 @@ export class SpecialisationEntity {
     this.name = specialisation.name
     this.slug = specialisation.slug
     this.id = specialisation.id
+    this.autorID = specialisation.autorID
+  }
+
+  async delete () {
+    await SpecialisationModel.destroy({ where: { id: this.id } })
+
+    this.emit('deleted', this.id)
+  }
+
+  private emit (action: TSpecialisationAction, body: any) {
+    if (!body) return 
+
+    this.emitter(action, body)
   }
 }

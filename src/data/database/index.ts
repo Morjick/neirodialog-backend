@@ -15,6 +15,7 @@ import { PromocodeModel } from "./models/products/PromocodeModel"
 import { OrderItem } from "./models/orders/OrderItem"
 import { Order } from "./models/orders/OrderModel"
 import { DocumentModel } from "./models/documents/Document"
+import { SlotModel } from "./models/specialist/SlotModel"
 
 export interface DataBaseConstructorInterface {
   HOST: string | number
@@ -71,6 +72,7 @@ export const startNeirodialogDataBase = async (data: DataBaseConstructorInterfac
         OrderItem,
         Order,
         DocumentModel,
+        SlotModel,
       ],
     }
   )

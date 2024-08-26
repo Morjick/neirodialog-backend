@@ -38,12 +38,14 @@ export class ProductsController {
   }
 
   @Get('/get-sections')
-  async getSections () {
+  async getSections (@QueryParams() query) {
+    const sections = this.reposities.sections.getList(query)
+
     return {
       status: 200,
       message: 'Разделы были получены',
       body: {
-        sections: this.reposities.sections.getList(),
+        sections: sections,
       }
     }
   }

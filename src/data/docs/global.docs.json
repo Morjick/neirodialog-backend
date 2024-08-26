@@ -271,7 +271,7 @@
         }
       }
     },
-    "get-file/:path": {
+    "get-file/:directory/:path": {
       "get": {
         "x-swagger-router-controller": "home",
         "operationId": "get-file",
@@ -344,7 +344,7 @@
         "description": "Получить все разделы для продуктов"
       }
     },
-    "products/delete-sections": {
+    "products/delete-sections:/id": {
       "delete": {
         "x-swagger-router-controller": "home",
         "operationId": "delete-sections",
@@ -638,6 +638,14 @@
             "type": "number"
           }
         ]
+      }
+    },
+    "products/delete-product:/id": {
+      "delete": {
+        "x-swagger-router-controller": "home",
+        "operationId": "delete-product",
+        "tags": ["Products"],
+        "description": "Удалить продукт"
       }
     },
     "products/add-comment": {
@@ -1123,6 +1131,14 @@
         ]
       }
     },
+    "news/delete-news/:id": {
+      "delete": {
+        "x-swagger-router-controller": "home",
+        "operationId": "delete-news",
+        "tags": ["News"],
+        "description": "Удалить новость"
+      }
+    },
     "orders/create-order": {
       "post": {
         "x-swagger-router-controller": "home",
@@ -1139,6 +1155,180 @@
         "tags": ["Orders"],
         "description": "Получить список заказов",
         "parameters": []
+      }
+    },
+    "specialists/specialisations": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-specialisations",
+        "tags": ["Specialists"],
+        "description": "Получить список специализаций"
+      },
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-specialisations",
+        "tags": ["Specialists"],
+        "description": "Создать специализацию",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "json",
+            "required": true,
+            "type": "boolean"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": true,
+            "type": "boolean"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "minOld",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "maxOld",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    "specialists/specialisations/:slug": {
+      "patch": {
+        "x-swagger-router-controller": "home",
+        "operationId": "update-specialisations",
+        "tags": ["Specialists"],
+        "description": "Изменить специализацию",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "minOld",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "maxOld",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    "specialists/specialists": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-specialists",
+        "tags": ["Specialists"],
+        "description": "Получить список специалистов",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "json",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "secialisations",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "limit",
+            "in": "json",
+            "required": false,
+            "type": "number"
+          }
+        ]
+      },
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-specialist",
+        "tags": ["Specialists"],
+        "description": "Создать специалиста",
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "json",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "specialisationsID",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "specialists/specialists/:id": {
+      "patch": {
+        "x-swagger-router-controller": "home",
+        "operationId": "update-specialist",
+        "tags": ["Specialists"],
+        "description": "Изменить специалиста",
+        "parameters": [
+          {
+            "name": "specialisationsID",
+            "in": "json",
+            "required": false,
+            "type": "array"
+          },
+          {
+            "name": "description",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "json",
+            "required": false,
+            "type": "string"
+          }
+        ]
       }
     }
   }
