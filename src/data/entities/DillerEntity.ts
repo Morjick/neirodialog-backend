@@ -16,13 +16,14 @@ export interface ICreateDiller {
   name: string
   email: string
   description?: string
+  body?: string
   availableProductsCount?: number
   availableCommandLength?: number
   directorID: number
   productTypePermission: TDillerProductTypePermission
   autorID: number
-  social: IDillerSocial
-  documentsID: number[]
+  social?: IDillerSocial
+  documentsID?: number[]
 }
 
 export type TDillerUserRole = 'MANAGER' | 'ADMIN' | 'DIRECTOR'
@@ -63,6 +64,7 @@ export class DillerEntity {
   public social: IDillerSocial
   public documentsID: number[]
   public documents: IDocumentModel[]
+  public body: string
 
   private directorID: number
   private director: IUserOpenData
@@ -127,6 +129,8 @@ export class DillerEntity {
       this.productTypePermission = data.productTypePermission || 'any'
       this.description = data.description
       this.social = data.social
+      this.body = data.body || ''
+      this.documentsID = data.documentsID || []
 
       const diller = await DillerModel.create({
         name: this.name,
@@ -138,7 +142,8 @@ export class DillerEntity {
         directorID: director.id,
         productTypePermission: this.productTypePermission,
         description: this.description,
-        social: JSON.stringify(this.social)
+        social: JSON.stringify(this.social),
+        body: this.body,
       })
 
       await this.findCommand()
@@ -185,6 +190,7 @@ export class DillerEntity {
       }
 
       this.social = data.social
+      this.documentsID = data.documentsID || []
       await this.getDocuments()
 
       await DillerModel.update({ ...data, social: JSON.stringify(this.social) }, { where: { id: this.id } })
@@ -226,8 +232,10 @@ export class DillerEntity {
     this.productTypePermission = diller.productTypePermission
     this.adminsID = diller.adminsID || []
     this.managersID = diller.managersID || []
+    this.documentsID = diller.documentsID || []
     this.id = diller.id
     this.social = JSON.parse(diller.social)
+    this.body = diller.body
 
     const User = new UserEntity({ userID: this.directorID })
     this.director = await User.getAutor()

@@ -30,6 +30,7 @@ export class CreateDillerContract {
   avatar?: string
   social?: IDillerSocial
   documentsID: number[]
+  body: string
 }
 
 export class UpdateDillerContract {
@@ -44,6 +45,7 @@ export class UpdateDillerContract {
   managersID: number[]
   social: IDillerSocial
   documentsID: number[]
+  body: string
 }
 
 export class UpdateCommandContract {

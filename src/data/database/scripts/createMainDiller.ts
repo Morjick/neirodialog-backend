@@ -19,11 +19,13 @@ export const createMainDiller = async () => {
     const mainDiller = await Diller.create({
       email: rootUser.dataValues.email,
       name: 'Neirodialog',
+      body: '',
       directorID: rootUser.dataValues.id,
       availableProductsCount: 1000,
       availableCommandLength: 100,
       productTypePermission: 'any',
       autorID: rootUser.dataValues.id,
+      description: '',
     })
     console.log('Main Diller created')
 

@@ -100,7 +100,11 @@ const startServer = async () => {
 
     const filename = `${date}-${error.name}.txt`
 
-    fs.writeFileSync(`/data/static/logs/${filename}`, error.message)
+    const logPath = path.join(__dirname, 'data', 'static', 'logs', filename)
+
+    fs.writeFile(logPath, error.message, (err) => {
+      console.log('error on create log file: ', err)
+    })
 
     console.log('server error: ', e)
   }

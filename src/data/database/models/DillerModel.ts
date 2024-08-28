@@ -30,6 +30,9 @@ export class DillerModel extends Model {
   @Column({ type: DataType.TEXT })
   description: string
 
+  @Column({ type: DataType.TEXT })
+  body: string
+
   @Column({ type: DataType.STRING })
   avatar: string
 
@@ -48,7 +51,7 @@ export class DillerModel extends Model {
   @Column({ type: DataType.JSON })
   social: string
 
-  @Column({ type: DataType.ARRAY(DataType.INTEGER) })
+  @Column({ type: DataType.ARRAY(DataType.INTEGER), defaultValue: [] })
   documentsID: number[]
   
   @Column({ type: DataType.ENUM('any', 'physical', 'electronic') })
