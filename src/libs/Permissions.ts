@@ -2,7 +2,8 @@ import { UserRoleType } from "~/data/database/models/UserModel"
 import { TDillerUserRole } from "~/data/entities/DillerEntity"
 
 export type TPermission = 'update' | 'create' | 'add' | 'delete' | 'read'
-export type TModerationPermissions = 'comments' | 'products' | 'calendar' | 'call'
+export type TModerationPermissions = 'comments' | 'products' | 'calendar' | 'call' | 'pages'
+export type TAdminAction = 'add-moderator' | 'add-admin' | 'add-diller' | 'remove-admin' | 'remove-moderator' | 'remove-diller'
 
 export type TDillerNamespased = 'chat' | 'command' | 'analytics'
 export type TDillerCommandPermission = 'add-manager' | 'add-admin' | 'delete-manager' | 'delete-admin'
@@ -16,6 +17,7 @@ export interface IRolePermissions {
   user: TPermission[]
   specialist: TPermission[]
   moderation: TModerationPermissions[]
+  admin: TAdminAction[]
 }
 
 export const USER_PERMISSIONS: IRolePermissions[] = [
@@ -26,8 +28,9 @@ export const USER_PERMISSIONS: IRolePermissions[] = [
     dillers: ['create', 'update', 'delete', 'add', 'read'],
     orders: ['create', 'update', 'delete', 'add', 'read'],
     user: ['create', 'update', 'delete', 'add', 'read'],
-    moderation: ['comments', 'products'],
+    moderation: ['comments', 'products', 'calendar', 'call', 'pages'],
     specialist: ['create', 'update', 'delete', 'add', 'read'],
+    admin: ['add-admin', 'add-diller', 'add-moderator', 'remove-moderator', 'remove-moderator', 'add-diller'],
   },
   {
     name: 'ADMIN',
@@ -36,8 +39,9 @@ export const USER_PERMISSIONS: IRolePermissions[] = [
     dillers: ['create', 'update', 'delete', 'add', 'read'],
     orders: ['create', 'update', 'delete', 'add', 'read'],
     user: ['create', 'update', 'delete', 'add', 'read'],
-    moderation: ['comments', 'products'],
+    moderation: ['comments', 'products', 'calendar', 'call', 'pages'],
     specialist: ['create', 'update', 'delete', 'add', 'read'],
+    admin: ['add-diller', 'remove-moderator', 'remove-moderator', 'add-diller'],
   },
   {
     name: 'MODERATOR',
@@ -46,8 +50,9 @@ export const USER_PERMISSIONS: IRolePermissions[] = [
     dillers: ['update', 'delete', 'read'],
     orders: ['update', 'delete', 'read'],
     user: ['update', 'delete', 'read'],
-    moderation: ['comments', 'products'],
+    moderation: ['comments', 'products', 'calendar', 'call'],
     specialist: ['update', 'delete', 'read'],
+    admin: ['add-diller', 'add-diller'],
   },
   {
     name: 'DILLER',
@@ -58,6 +63,7 @@ export const USER_PERMISSIONS: IRolePermissions[] = [
     user: ['read'],
     moderation: [],
     specialist: ['read'],
+    admin: [],
   },
   {
     name: 'USER',
@@ -68,6 +74,7 @@ export const USER_PERMISSIONS: IRolePermissions[] = [
     user: [],
     moderation: [],
     specialist: [],
+    admin: [],
   },
 ]
 

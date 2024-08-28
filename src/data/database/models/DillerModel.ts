@@ -44,6 +44,12 @@ export class DillerModel extends Model {
 
   @Column({ type: DataType.ARRAY(DataType.INTEGER) })
   productsID: number[]
+
+  @Column({ type: DataType.JSON })
+  social: string
+
+  @Column({ type: DataType.ARRAY(DataType.INTEGER) })
+  documentsID: number[]
   
   @Column({ type: DataType.ENUM('any', 'physical', 'electronic') })
   productTypePermission: TDillerProductTypePermission

@@ -16,6 +16,8 @@ import { OrderItem } from "./models/orders/OrderItem"
 import { Order } from "./models/orders/OrderModel"
 import { DocumentModel } from "./models/documents/Document"
 import { SlotModel } from "./models/specialist/SlotModel"
+import { Pages } from "./models/pages/PagesModel"
+import { createDefaultPages } from "./scripts/createDefaultPages"
 
 export interface DataBaseConstructorInterface {
   HOST: string | number
@@ -73,6 +75,7 @@ export const startNeirodialogDataBase = async (data: DataBaseConstructorInterfac
         Order,
         DocumentModel,
         SlotModel,
+        Pages,
       ],
     }
   )
@@ -83,6 +86,7 @@ export const startNeirodialogDataBase = async (data: DataBaseConstructorInterfac
 
     await createRootUser()
     await createMainDiller()
+    await createDefaultPages()
   } catch (e) {
     console.error('Ошибка при подключении к базе данных', e)
     throw new Error(e)

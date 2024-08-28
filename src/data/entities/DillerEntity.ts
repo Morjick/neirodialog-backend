@@ -8,6 +8,7 @@ import { Reposity } from '../reposityes'
 import { IResponse } from '../interfaces'
 import { UpdateDillerContract } from '../contracts/product.contracts'
 import { IDillerRolePermission, Permissions } from '~/libs/Permissions'
+import { DocumentModel, IDocumentModel } from '../database/models/documents/Document'
 
 export type TDillerProductTypePermission = 'any' | 'physical' | 'electronic'
 
@@ -20,6 +21,8 @@ export interface ICreateDiller {
   directorID: number
   productTypePermission: TDillerProductTypePermission
   autorID: number
+  social: IDillerSocial
+  documentsID: number[]
 }
 
 export type TDillerUserRole = 'MANAGER' | 'ADMIN' | 'DIRECTOR'
@@ -42,6 +45,13 @@ export interface IAddParticipant {
   action: TCommandAction
 }
 
+export interface IDillerSocial {
+  vk: string
+  ok: string
+  telegram: string
+  whatsapp: string
+}
+
 export class DillerEntity {
   public name: string
   public slug: string
@@ -50,6 +60,9 @@ export class DillerEntity {
   public productsID: number[] = []
   public products: IProductModel[]
   public description: string
+  public social: IDillerSocial
+  public documentsID: number[]
+  public documents: IDocumentModel[]
 
   private directorID: number
   private director: IUserOpenData
@@ -67,14 +80,21 @@ export class DillerEntity {
     this.emitter = new EventEmitter()
   }
 
-  async create (data: ICreateDiller) {
+  async create (data: ICreateDiller): Promise<IResponse> {
     try {
-      const User = new UserEntity({ userID: data.directorID })
-      const director = await User.getAutor()
+      const admin = Reposity.users.findByID(data.autorID)
 
-      if (!director) {
-        return
+      if (!admin.rolePermissions.dillers.includes('create')) return {
+        status: 403,
+        message: 'У вас нет доступа к созданию диллера',
+        exeption: {
+          type: 'PermissionDied',
+          message: 'Have not permission "create" in diller permissions'
+        }
       }
+
+      const User = Reposity.users.findByID(data.directorID)
+      const director = await User.getAutor()
 
       if (!director) return {
         status: 404,
@@ -106,6 +126,7 @@ export class DillerEntity {
       this.autorID = data.autorID
       this.productTypePermission = data.productTypePermission || 'any'
       this.description = data.description
+      this.social = data.social
 
       const diller = await DillerModel.create({
         name: this.name,
@@ -117,6 +138,16 @@ export class DillerEntity {
         directorID: director.id,
         productTypePermission: this.productTypePermission,
         description: this.description,
+        social: JSON.stringify(this.social)
+      })
+
+      await this.findCommand()
+      await this.getDocuments()
+
+      this.command.forEach(async (user) => {
+        const response = await Reposity.users.updateUserRole('DILLER', admin, user.id)
+
+        if (response.status !== 200 && response.status !== 201) throw new Error(response.error)
       })
 
       return {
@@ -129,8 +160,12 @@ export class DillerEntity {
     } catch (e) {
       return {
         status: 501,
-        message: Error(e).message,
-        error: Error(e).message,
+        message: 'Не удалось создать диллера',
+        error: Error(e),
+        exeption: {
+          type: 'Unexepted',
+          message: new Error(e).message
+        }
       }
     }
   }
@@ -149,7 +184,10 @@ export class DillerEntity {
         }
       }
 
-      await DillerModel.update({ ...data }, { where: { id: this.id } })
+      this.social = data.social
+      await this.getDocuments()
+
+      await DillerModel.update({ ...data, social: JSON.stringify(this.social) }, { where: { id: this.id } })
       this.emit('update', this)
 
       return {
@@ -189,47 +227,14 @@ export class DillerEntity {
     this.adminsID = diller.adminsID || []
     this.managersID = diller.managersID || []
     this.id = diller.id
+    this.social = JSON.parse(diller.social)
 
     const User = new UserEntity({ userID: this.directorID })
     this.director = await User.getAutor()
 
+    await this.getDocuments()
+
     return this.findCommand()
-  }
-
-  private async findCommand () {
-    const comand: IDillerUser[] = []
-
-    this.adminsID.forEach(async (id) => {
-      const user = await Reposity.users.findByID(id)?.getAutor()
-      if (!user) return
-
-      this.command.push({
-        ...user,
-        role: 'ADMIN',
-        permissions: Permissions.getDillerPermissions('ADMIN')
-      })
-    })
-
-    this.managersID.forEach(async (id) => {
-      const user = await Reposity.users.findByID(id)?.getAutor()
-      if (!user) return
-
-      this.command.push({
-        ...user,
-        role: 'MANAGER',
-        permissions: Permissions.getDillerPermissions('MANAGER')
-      })
-    })
-
-    comand.push({
-      ...this.director,
-      role: 'DIRECTOR',
-      permissions: Permissions.getDillerPermissions('DIRECTOR')
-    })
-
-    this.command = comand
-
-    return this
   }
 
   public getDirector (): IDillerUser {
@@ -253,6 +258,10 @@ export class DillerEntity {
     const user = this.command.find(el => el.id === userID)
 
     return !!user
+  }
+
+  public findParticipant (userID: number) {
+    return this.command.find((user) => user.id == userID)
   }
 
   public addProductToList (productID: number) {
@@ -365,6 +374,42 @@ export class DillerEntity {
     }
   }
 
+  private async findCommand () {
+    const comand: IDillerUser[] = []
+
+    this.adminsID.forEach(async (id) => {
+      const user = await Reposity.users.findByID(id)?.getAutor()
+      if (!user) return
+
+      this.command.push({
+        ...user,
+        role: 'ADMIN',
+        permissions: Permissions.getDillerPermissions('ADMIN')
+      })
+    })
+
+    this.managersID.forEach(async (id) => {
+      const user = await Reposity.users.findByID(id)?.getAutor()
+      if (!user) return
+
+      this.command.push({
+        ...user,
+        role: 'MANAGER',
+        permissions: Permissions.getDillerPermissions('MANAGER')
+      })
+    })
+
+    comand.push({
+      ...this.director,
+      role: 'DIRECTOR',
+      permissions: Permissions.getDillerPermissions('DIRECTOR')
+    })
+
+    this.command = comand
+
+    return this
+  }
+
   private async updateCommand (body: IUpdateCommandBody) {
     this.managersID = body.managersID || this.managersID
     this.adminsID = body.adminsID || this.adminsID
@@ -377,6 +422,19 @@ export class DillerEntity {
 
   private getUser (userID: number): IDillerUser {
     return this.command.find(user => user.id == userID) || null
+  }
+
+  private async getDocuments () {
+    const documents: IDocumentModel[] = []
+
+    this.documentsID.forEach(async (documentID) => {
+      const result = await DocumentModel.findByPk(documentID)
+
+      if (!result) return
+      documents.push(result.dataValues)
+    })
+
+    this.documents = documents
   }
 
   private emit (action: TDillerEmitAction, body: any) {

@@ -271,6 +271,28 @@
         }
       }
     },
+    "static/create-document": {
+      "post": {
+        "x-swagger-router-controller": "home",
+        "operationId": "create-document",
+        "tags": ["Static"],
+        "description": "Сохранить документ",
+        "parameters": [
+          {
+            "name": "href",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
     "get-file/:directory/:path": {
       "get": {
         "x-swagger-router-controller": "home",
@@ -315,6 +337,38 @@
             "name": "messagerHref",
             "in": "json",
             "required": false,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "app/get-page/main-page": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-main-page",
+        "tags": ["App"],
+        "description": "Получить главную страницу"
+      }
+    },
+    "app/get-page/about-page": {
+      "get": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-about-page",
+        "tags": ["App"],
+        "description": "Получить страницу 'О нас'"
+      }
+    },
+    "app/update-page/:name": {
+      "patch": {
+        "x-swagger-router-controller": "home",
+        "operationId": "get-about-page",
+        "tags": ["App"],
+        "description": "Получить страницу 'О нас'",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "json",
+            "required": true,
             "type": "string"
           }
         ]
@@ -735,6 +789,22 @@
           "description": "Получить список промокодов",
           "parameters": []
         }
+    },
+    "products/update-product-showing/:id": {
+      "patch": {
+        "x-swagger-router-controller": "home",
+        "operationId": "update-product-showing",
+        "tags": ["Products"],
+        "description": "Изменить статус публикации продукта",
+        "parameters": [
+          {
+            "name": "isShow",
+            "in": "json",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
     },
     "dillers/create-diller": {
       "post": {

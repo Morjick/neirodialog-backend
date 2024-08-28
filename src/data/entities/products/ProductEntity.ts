@@ -228,6 +228,43 @@ export class ProductEntity {
     }
   }
 
+  async updateShowing (isShow: boolean, diller: DillerEntity, user: UserEntity): Promise<IResponse<any>> {
+    try {
+      const isUserRolePermission = user.rolePermissions.products.includes('update')
+      const dillerUser = diller.findParticipant(user.id)
+      const isDillerPermissions = dillerUser.permissions.products.includes('update')
+      
+      if ((!dillerUser || !isDillerPermissions) && !isUserRolePermission) return {
+        status: 403,
+        message: 'У вас нет доступа для редактирование продуктов этого диллера',
+        exeption: {
+          message: 'Have not permission "update" or not accessed user in diller',
+          type: 'PermissionDied'
+        }
+      }
+
+      this.isShow = isShow
+      ProductModel.update({ isShow }, { where: { id: this.id } })
+      this.emit('update', this)
+
+      return {
+        status: 200,
+        message: isShow ? 'Продукт опубликован' : 'Продукт скрыт'
+      }
+    } catch (error) {
+      const exeption = new Error(error)
+      return {
+        status: 501,
+        message: 'Не удалось изменить статус публикации продукта',
+        error: exeption,
+        exeption: {
+          type: 'Unexepted',
+          message: exeption.message
+        }
+      }
+    }
+  }
+
   async changeSection (section: SectionEntity) {
     this.sectionID = section.id
     this.section = section

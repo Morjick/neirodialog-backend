@@ -165,6 +165,57 @@ export class UserEntity {
     }
   }
 
+  public async updateRole (role: UserRoleType, admin: UserEntity): Promise<IResponse> {
+    try {
+      const currentRole = this.getRole()
+    
+      if (currentRole == 'ROOT') return {
+        status: 301,
+        message: 'Вы не можете изменить роль этого пользователя',
+        exeption: {
+          type: 'Invalid',
+          message: 'ROOT user is constain'
+        }
+      }
+  
+      const permissionResponse: IResponse = {
+        status: 403,
+        message: 'У вас нет доступа для выполнения данного действия',
+        exeption: {
+          type: 'PermissionDied',
+          message: 'Have not permission in admin permissions'
+        }
+      }
+  
+      if ((role == 'ADMIN' && currentRole == 'USER') && !admin.rolePermissions.admin.includes('add-admin')) return permissionResponse
+      if ((role == 'MODERATOR' && currentRole == 'USER') && !admin.rolePermissions.admin.includes('add-moderator')) return permissionResponse
+      if ((role == 'DILLER' && currentRole == 'USER') && !admin.rolePermissions.admin.includes('add-diller')) return permissionResponse
+      if ((role == 'USER' && currentRole == 'ADMIN') && !admin.rolePermissions.admin.includes('remove-admin')) return permissionResponse
+      if ((role == 'USER' && currentRole == 'MODERATOR') && !admin.rolePermissions.admin.includes('remove-moderator')) return permissionResponse
+      if ((role == 'USER' && currentRole == 'DILLER') && !admin.rolePermissions.admin.includes('remove-diller')) return permissionResponse
+  
+      this.user.role == role
+      await UserModel.update({ role: role }, { where: { id: this.id } })
+      this.emit('update', this)
+  
+      return {
+        status: 200,
+        message: 'Роль изменена'
+      }
+    } catch (e) {
+      const error = new Error(e)
+      return {
+        status: 501,
+        message: 'Не удалось изменить роль',
+        exeption: {
+          type: 'Unexepted',
+          message: error.message
+        },
+        error: error,
+      }
+    }
+  }
+
   public get profile (): IUserProfile {
     const orders = Reposity.orders.getPersonalList(this.id)
     const library = Reposity.orders.getUserLibrary(this.id)

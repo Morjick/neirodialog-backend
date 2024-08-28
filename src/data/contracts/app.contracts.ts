@@ -26,3 +26,8 @@ export class StaticCreateDocument {
   @IsNotEmpty({ message: 'Укажите название документа' })
   title: string
 }
+
+export class UpdatePageContract {
+  @IsString({ message: 'Укажите тело страницы' })
+  body: string
+}

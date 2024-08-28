@@ -6,7 +6,7 @@ export interface IResponseError {
   type: TErrorType
 }
 
-export interface IResponse<BodyResponse> {
+export interface IResponse<BodyResponse = any> {
   status: number
   message: string
   body?: BodyResponse

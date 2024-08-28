@@ -1,3 +1,4 @@
+import { Permissions } from "~/libs/Permissions"
 import { CreateProductContract } from "../contracts/product.contracts"
 import { UserRoleType } from "../database/models/UserModel"
 import { ProductModel } from "../database/models/products/ProductModel"
@@ -7,6 +8,7 @@ import { IUserModel, UserEntity } from "../entities/UserEntity"
 import { ProductEntity, TProductType } from "../entities/products/ProductEntity"
 import { ICreatePromocode, PromocodeEntity } from "../entities/products/PromocodeEntity"
 import { SectionEntity } from "../entities/products/SectionEntity"
+import { IResponse } from "../interfaces"
 
 export type TPromocodeStatus = 'active' | 'deactive' | 'all'
 
@@ -68,13 +70,7 @@ export class ProductReposity {
         const product = new ProductEntity()
         await product.findByID(el.dataValues.id)
 
-        product.emitter.on('update', (product: ProductEntity) => {
-          if (!product) return
-
-          const productIndex = this.list.findIndex((el) => el.id == product.id)
-
-          this.list[productIndex] = product
-        })
+        product.emitter.on('update', (product: ProductEntity) => this.onProductUpdated(product))
   
         this.list.push(product)
   
@@ -97,14 +93,24 @@ export class ProductReposity {
     return this
   }
 
+  onProductUpdated (product: ProductEntity) {
+    if (!product) return
+
+    const productIndex = this.list.findIndex((el) => el.id == product.id)
+
+    product.emitter.on('update', (updatedProduct: ProductEntity) => this.onProductUpdated(updatedProduct))
+
+    this.list[productIndex] = product
+    this.updateShowedList()
+  }
+
   getProducts (options?: IGetProductsOptions): ProductEntity[] {
     const {
       role = 'USER',
-      user = null,
       filters = defaultFilters,
     } = options
 
-    const products = this.getListForRole(role, user)
+    const products = this.getListForRole(role)
       .filter((product) => {
         const dillersIDs = String(filters.dillerIDs).replace('[', '').replace(']', '').split(',').map((el) => Number(el)).filter((el) => !!el)
         const autorIDs = String(filters.autorIDs).replace('[', '').replace(']', '').split(',').map((el) => Number(el)).filter((el) => !!el)
@@ -267,15 +273,11 @@ export class ProductReposity {
     return this.list.find(item => item.id === id)
   }
 
-  getListForRole (role: UserRoleType, user?: IUserModel): ProductEntity[] {
-    if (role == 'ROOT' || role === 'ADMIN') return this.list
+  getListForRole (role: UserRoleType): ProductEntity[] {
+    const permissions = Permissions.getRolePermissions(role)
+    const isRolePermissions = permissions.products.includes('read')
 
-    if (role === 'DILLER') return this.list.map((product) => {
-      const isDiller = user ? product.diller.accessUser(user.id) : false
-      if (product.isShow || isDiller) return product
-    })
-
-    if (role === 'MODERATOR' || role === 'USER') return this.showedProducts
+    if (isRolePermissions) return this.list
 
     return this.showedProducts
   }
@@ -321,6 +323,21 @@ export class ProductReposity {
     const product = this.list.find(el => el.id == productID)
 
     return await product.update(data, diller, user)
+  }
+
+  async updateShowingProduct (isShow: boolean, diller: DillerEntity, user: UserEntity, productID: number): Promise<IResponse<any>> {
+    const product = this.list.find((el) => el.id == productID)
+    
+    if (!product) return {
+      status: 404,
+      message: 'Продукт не найден',
+      exeption: {
+        type: 'NotFound',
+        message: `Product with ID ${productID} not found`
+      }
+    }
+
+    return await product.updateShowing(isShow, diller, user)
   }
 
   public get publicList () {

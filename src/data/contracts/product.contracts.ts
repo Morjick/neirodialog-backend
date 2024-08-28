@@ -1,5 +1,5 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString, Max, MaxLength, Min, MinLength } from "class-validator"
-import { TCommandAction, TDillerProductTypePermission, TDillerUserRole } from "../entities/DillerEntity"
+import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsString, Max, MaxLength, Min, MinLength } from "class-validator"
+import { IDillerSocial, TCommandAction, TDillerProductTypePermission, TDillerUserRole } from "../entities/DillerEntity"
 import { IProductFeatures, TProductType } from "../entities/products/ProductEntity"
 
 export class CreateProductSectionContract {
@@ -25,12 +25,11 @@ export class CreateDillerContract {
   productTypePermission: TDillerProductTypePermission
   
   availableProductsCount?: number
-
   availableCommandLength?: number
-
   description?: string
-
   avatar?: string
+  social?: IDillerSocial
+  documentsID: number[]
 }
 
 export class UpdateDillerContract {
@@ -43,6 +42,8 @@ export class UpdateDillerContract {
   avatar: string
   adminsID: number[]
   managersID: number[]
+  social: IDillerSocial
+  documentsID: number[]
 }
 
 export class UpdateCommandContract {
@@ -82,6 +83,11 @@ export class CreateProductContract {
   @IsNumber({}, { message: 'Цена должна быть числом' })
   @IsNotEmpty({ message: 'Укажите цену' })
   price: number
+}
+
+export class UpdateProductShowingContract {
+  @IsBoolean({ message: 'Укажите статус видимости продукта' })
+  isShow: boolean
 }
 
 export class ChangeSectionForProductContract {

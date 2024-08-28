@@ -11,6 +11,7 @@ import {
   Req,
   Params,
   Patch,
+  QueryParams,
 } from 'routing-controllers'
 import { IsValidPassword } from '../libs/isValidVassword'
 import * as bcrypt from 'bcrypt'
@@ -21,6 +22,7 @@ import { Reposity } from '~/data/reposityes'
 import { IResponse } from '~/data/interfaces'
 import { IUserModel } from '~/data/entities/UserEntity'
 import { AdminMiddleware } from '~/middleware/admin.middleware'
+import { Permissions } from '~/libs/Permissions'
 
 @JsonController('/user')
 export class UserController {
@@ -107,27 +109,50 @@ export class UserController {
       }
     )
 
+    const permissions = Permissions.getRolePermissions(user.dataValues.role)
+
     return {
       status: 200,
       message: 'Пользователь авторизован',
       body: {
         token,
-        user: user.dataValues
+        user: user.dataValues,
+        permissions,
       }
     }
   }
 
   @Post('/check-token')
-  async checkToken (@Body() body) {
-    const { token } = body
+  async checkToken (@Body() body): Promise<IResponse<any>> {
+    try {
+      const { token } = body
 
-    const isValid = await checkToken(token)
+      const isValid = await checkToken(token)
+  
+      const role = isValid.user?.role
 
-    return {
-      status: isValid.status,
-      message: isValid.message,
-      error: isValid.error || null,
-      body: {},
+      if (!role) throw new Error('Не удалось установить роль пользоватея')
+
+      const permissions = Permissions.getRolePermissions(role)
+  
+      return {
+        status: isValid.status,
+        message: isValid.message,
+        error: isValid.error || null,
+        body: {
+          permissions,
+        },
+      }
+    } catch (e) {
+      return {
+        status: 401,
+        message: 'Не удалось проверить токен',
+        error: new Error(e),
+        exeption: {
+          type: 'Unexepted',
+          message: new Error(e).message
+        }
+      }
     }
   }
 
@@ -142,6 +167,51 @@ export class UserController {
       message: 'Корзина получена',
       body: {
         cart,
+      }
+    }
+  }
+
+  @Get('/user-list')
+  @UseBefore(AdminMiddleware)
+  async getList (@QueryParams() query, @Req() request): Promise<IResponse> {
+    try {
+      const userModel = request.user
+      const user = Reposity.users.findByID(userModel.id)
+
+      if (!user.rolePermissions.user.includes('read')) return {
+        status: 403,
+        message: 'У вас нет доступа для чтения списка пользователей',
+        exeption: {
+          type: 'PermissionDied',
+          message: 'have not permission "read" in user permissions'
+        }
+      }
+
+      const options = {
+        search: query.search,
+        role: query.role || null
+      }
+
+      const result = Reposity.users.getList(options)
+
+      return {
+        status: 200,
+        message: 'Список пользователей получен',
+        body: {
+          totalCount: result.length,
+          users: result,
+        }
+      }
+    } catch (e) {
+      const error = new Error(e)
+      return {
+        status: 501,
+        message: 'Не удалось получить список пользователей',
+        error: error,
+        exeption: {
+          type: 'Unexepted',
+          message: error.message
+        }
       }
     }
   }

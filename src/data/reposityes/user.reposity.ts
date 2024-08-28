@@ -1,6 +1,12 @@
 import { UpdateUserContracts } from "../contracts/user.contracts"
-import { UserModel } from "../database/models/UserModel"
+import { UserModel, UserRoleType } from "../database/models/UserModel"
 import { UserEntity } from "../entities/UserEntity"
+import { IResponse } from "../interfaces"
+
+interface IUserSearchOptions {
+  search?: string
+  role?: UserRoleType
+}
 
 export class UserReposity {
   public list: UserEntity[] = []
@@ -35,8 +41,19 @@ export class UserReposity {
     return this.list.find((el) => el.id === id)
   }
 
-  getList () {
-    return this.list
+  getList (options?: IUserSearchOptions) {
+    const search = options?.search || ''
+    const role = options?.role || null
+
+    const list = this.list
+      .filter((user) => {
+        if (role && user.getRole() !== role) return null
+        if (search && !user.getFullName().toLocaleLowerCase().includes(search.toLowerCase())) return null
+
+        return user
+      })
+
+    return list
   }
 
   public async addUserToList (userID: number) {
@@ -56,5 +73,20 @@ export class UserReposity {
     const user = this.findByID(userID)
 
     return user.updateUser(body)
+  }
+
+  public async updateUserRole (role: UserRoleType, admin: UserEntity, userID: number): Promise<IResponse> {
+    const user = this.list.find((el) => el.id == userID)
+
+    if (!user) return {
+      status: 404,
+      message: 'Пользователь не найден',
+      exeption: {
+        type: 'NotFound',
+        message: `User with ID=${userID} not found`
+      }
+    }
+
+    return await user.updateRole(role, admin)
   }
 }

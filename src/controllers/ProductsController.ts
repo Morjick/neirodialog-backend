@@ -7,11 +7,13 @@ import {
   CreateProductContract,
   CreateProductSectionContract,
   CreatePromocodeContract,
+  UpdateProductShowingContract,
 } from "~/data/contracts/product.contracts"
 import { DillerEntity } from "~/data/entities/DillerEntity"
 import { IUserModel, UserEntity } from "~/data/entities/UserEntity"
 import { ProductEntity } from "~/data/entities/products/ProductEntity"
 import { SectionEntity } from "~/data/entities/products/SectionEntity"
+import { IResponse } from "~/data/interfaces"
 import { GlobalReposities, IGlobalReposisies, Reposity } from "~/data/reposityes"
 import { IPromocodesOptions } from "~/data/reposityes/product.reposity"
 import { AdminMiddleware } from "~/middleware/admin.middleware"
@@ -145,6 +147,32 @@ export class ProductsController {
         status: 501,
         message: 'Не удалось изменить продукт',
         error: 'Unexeption'
+      }
+    }
+  }
+
+  @Patch('/update-product-showing/:id')
+  @UseBefore(DillerMiddleware)
+  async updateProductShowing (@Params() params, @Req() request, @Body() body: UpdateProductShowingContract): Promise<IResponse<any>> {
+    try {
+      const id = params.id
+      const { isShow } = body
+      const diller = request.diller
+      const userModel = request.user
+
+      const user = Reposity.users.findByID(userModel.id)
+
+      return Reposity.products.updateShowingProduct(isShow, diller, user, id)
+    } catch (e) {
+      const error = new Error(e)
+      return {
+        status: 501,
+        message: 'Не удалось изменить продукт',
+        error: error,
+        exeption: {
+          type: 'Unexepted',
+          message: error.message
+        }
       }
     }
   }
