@@ -46,13 +46,24 @@ export const IsDillerMiddleware = async (
     const dillerName = request.headers.diller
 
     const { user, ok } = await checkToken(token)
+    const diller = Reposity.diller.list.find((el) => el.name == dillerName)
 
-    const diller = ok ? Reposity.diller.accessUser({ dillerName, userID: user.id }) : null
+    if (ok) {
+      request.user = user
+    }
 
-    request.user = user
-    request.diller = Reposity.diller.list.find((el) => el.name == dillerName)
+    if (diller) {
+      const isDiller = Reposity.diller.accessUser({
+        userID: user.id,
+        dillerName: diller.name
+      })
 
-    if (!user || !diller) throw new Error('Не далось установить пользователя или диллера')
+      if (isDiller) {
+        request.diller = diller
+      }
+    }
+
+
     next()
   } catch (e) {
     const error = response.status(403).json({

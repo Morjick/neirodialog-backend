@@ -20,6 +20,7 @@ import { ModerationController } from './controllers/ModerationController'
 import Container from 'typedi'
 import { DillerController } from './controllers/DillerController'
 import { SpecialistsController } from './controllers/SpecialistsController'
+import { OnlineController } from './controllers/OnlineController'
 
 const startServer = async () => {
   try {
@@ -53,7 +54,7 @@ const startServer = async () => {
 
     new SocketControllers({
       port: socketPort,
-      controllers: [ModerationController],
+      controllers: [ModerationController, OnlineController],
       container: Container,
     })
 

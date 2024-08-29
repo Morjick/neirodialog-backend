@@ -26,9 +26,8 @@ export class ModerationController {
         message: 'Не удалось установить пользователя',
         error: 'Unauthorized'
       }))
-  
-      const user = data.user
-      const isHavePermission = user.role == 'MODERATOR' || (user.role == 'ROOT' || user.role == 'ADMIN')
+
+      const isHavePermission = data.rolePermissions.moderation.includes('comments')
   
       if (!isHavePermission) return socket.emit('connection-error', JSON.stringify({
         status: 301,

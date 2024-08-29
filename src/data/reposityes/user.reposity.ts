@@ -41,7 +41,7 @@ export class UserReposity {
     return this.list.find((el) => el.id === id)
   }
 
-  getList (options?: IUserSearchOptions) {
+  async getList (options?: IUserSearchOptions) {
     const search = options?.search || ''
     const role = options?.role || null
 
@@ -53,7 +53,9 @@ export class UserReposity {
         return user
       })
 
-    return list
+    const autorList = await Promise.all(list.map(async (el) => await el.getAutor()))
+
+    return autorList
   }
 
   public async addUserToList (userID: number) {

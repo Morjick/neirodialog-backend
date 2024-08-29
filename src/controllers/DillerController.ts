@@ -1,4 +1,4 @@
-import { Body, Get, JsonController, Params, Patch, Post, Req, UseBefore } from "routing-controllers"
+import { Body, Delete, Get, JsonController, Params, Patch, Post, Req, UseBefore } from "routing-controllers"
 import { CreateDillerContract, UpdateCommandContract, UpdateDillerContract } from "~/data/contracts/product.contracts"
 import { DillerEntity } from "~/data/entities/DillerEntity"
 import { IUserModel } from "~/data/entities/UserEntity"
@@ -85,6 +85,61 @@ export class DillerController {
         exeption: {
           type: 'Unexepted',
           message: new Error(e).message
+        }
+      }
+    }
+  }
+
+  @Get('/get-dillers/:slug')
+  async getDillerDetail (@Params() params): Promise<IResponse> {
+    const { slug } = params
+    const diller = Reposity.diller.findForSlug(slug)
+
+    if (!diller) return {
+      status: 404,
+      message: 'Диллер не найден',
+      exeption: {
+        type: 'NotFound',
+        message: `Diller with slug="${slug}" not found`
+      }
+    }
+
+    return {
+      status: 200,
+      message: 'Диллер получен',
+      body: {
+        diller,
+      }
+    }
+  }
+
+  @Delete('/delete-diller/:slug')
+  @UseBefore(AdminMiddleware)
+  async deleteDiller (@Req() request, @Params() params): Promise<IResponse> {
+    try {
+      const userModel = request.user
+      const slug = params.slug
+
+      const user = Reposity.users.findByID(userModel.id)
+      const diller = Reposity.diller.findForSlug(slug)
+
+      if (!user || !diller) return {
+        status: 404,
+        message: 'Диллер или пользователь не найдены',
+        exeption: {
+          type: 'NotFound',
+          message: 'Diller or user not found'
+        }
+      }
+
+      return await Reposity.diller.deleteDiller(diller.id)
+    } catch (e) {
+      return {
+        status: 501,
+        message: 'Не удалось удалить диллера',
+        exeption: {
+          type: 'Unexepted',
+          message: 'Diller is not deleted'
         }
       }
     }

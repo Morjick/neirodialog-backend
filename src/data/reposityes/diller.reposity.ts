@@ -39,8 +39,23 @@ export class DillerReposity {
     return this
   }
 
+  private updateDiller (diller: DillerEntity) {
+    if (!diller) return
+
+    const dillerIndex = this.list.findIndex((el) => el.id == diller.id)
+    if (dillerIndex < 0) return
+
+    diller.emitter.on('update', (diller: DillerEntity) => this.updateDiller(diller))
+
+    this.list[dillerIndex] = diller
+  }
+
   public findForName (name: string) {
     return this.list.find(diller => diller.name = name)
+  }
+
+  public findForSlug (slug: string) {
+    return this.list.find(diller => diller.slug == slug)
   }
 
   public addDiller (diller: DillerEntity) {
@@ -79,5 +94,9 @@ export class DillerReposity {
     }
 
     return await diller.updateParticipant(body, userData)
+  }
+
+  public async deleteDiller (dillerID: number) {
+    return await DillerEntity.delete(dillerID)
   }
 }

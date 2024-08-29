@@ -123,7 +123,7 @@ export class UserController {
   }
 
   @Post('/check-token')
-  async checkToken (@Body() body): Promise<IResponse<any>> {
+  async checkToken (@Body() body): Promise<IResponse> {
     try {
       const { token } = body
 
@@ -192,7 +192,7 @@ export class UserController {
         role: query.role || null
       }
 
-      const result = Reposity.users.getList(options)
+      const result = await Reposity.users.getList(options)
 
       return {
         status: 200,
@@ -218,7 +218,7 @@ export class UserController {
 
   @Get('/profile')
   @UseBefore(AuthMiddleware)
-  async getProfile (@Req() request): Promise<IResponse<any>> {
+  async getProfile (@Req() request): Promise<IResponse> {
     try {
       const user: IUserModel = request.user
       const profile = Reposity.users.getProfile(user.id)
@@ -245,7 +245,7 @@ export class UserController {
 
   @Get('/get-user/:id')
   @UseBefore(AdminMiddleware)
-  async getUser (@Req() request, @Params() params): Promise<IResponse<any>> {
+  async getUser (@Req() request, @Params() params): Promise<IResponse> {
     try {
       const { id } = params
 
@@ -296,7 +296,7 @@ export class UserController {
 
   @Patch('/update-user/:id')
   @UseBefore(AuthMiddleware)
-  async updateUser (@Req() request, @Params() params, @Body() body: UpdateUserContracts): Promise<IResponse<any>> {
+  async updateUser (@Req() request, @Params() params, @Body() body: UpdateUserContracts): Promise<IResponse> {
     try {
       const { id } = params
       const userModel: IUserModel = request.user

@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import { OrderItem } from "../database/models/orders/OrderItem"
 import { Order } from "../database/models/orders/OrderModel"
 import { DillerEntity } from "../entities/DillerEntity"
@@ -12,14 +13,18 @@ interface IGetOrderListParams {
 }
 
 export class OrderReposity {
-  items: OrderItemEntity[] = []
-  list: OrderEntity[] = []
-  stack = []
+  public items: OrderItemEntity[] = []
+  public list: OrderEntity[] = []
+  public stack = []
+
+  public emitter = null
 
   constructor () {
     this.items = []
     this.list = []
     this.stack = []
+
+    this.emitter = new EventEmitter()
   }
 
   public async buildReposity () {
@@ -36,7 +41,7 @@ export class OrderReposity {
   }
 
   public async buildOrders () {
-    const orders = await Order.findAll()
+    const orders = await Order.findAll({ attributes: ['id'] })
 
     await Promise.all([
       orders.map(async (item) => {
@@ -47,6 +52,9 @@ export class OrderReposity {
         })
 
         await order.findByID(item.id)
+        order.items.forEach((orderItem) => {
+          orderItem.setOrderID(item.id)
+        })
       }),
     ])
 
@@ -60,7 +68,7 @@ export class OrderReposity {
       const order = response.body.order
       const itemsID: number[] = response.body.itemsID
 
-      this.addOrderItemsToList(itemsID)
+      this.addOrderItemsToList(itemsID, order.id)
       this.addOrderToList(order.id)
     }
 
@@ -133,7 +141,7 @@ export class OrderReposity {
     }
   }
 
-  public async addOrderItemsToList (itemsID: number[]) {
+  public async addOrderItemsToList (itemsID: number[], orderID?: number) {
     await Promise.all(
       itemsID.map(async (id) => {
         const orderItem = new OrderItemEntity()
@@ -143,28 +151,47 @@ export class OrderReposity {
           this.items.push(element)
         })
 
-        orderItem.emitter.on('update', (element: OrderItemEntity) => {
+        orderItem.emitter.on('update', (element: OrderItemEntity) => this.updateOrderItem(element))
+        orderItem.emitter.on('change-status', (element: OrderItemEntity) => {
           if (!element) return
-
-          try {
-            const itemIndex = this.items.findIndex(el => el.id == element.id)
-  
-            if (!itemIndex || itemIndex < 0) return
-            this.items[itemIndex] = element
-          } catch (e) {
-            console.log('error on update item: ', e)
-          }
+          this.emitter.emit('change-status', element)
         })
+
+        if (orderID) {
+          orderItem.setOrderID(orderID)
+        }
 
         await orderItem.findByID(id)
       })
     )
   }
 
+  public async updateOrderItem (element: OrderItemEntity) {
+    if (!element) return
+
+    try {
+      const itemIndex = this.items.findIndex(el => el.id == element.id)
+
+      if (!itemIndex || itemIndex < 0) return
+
+      this.items[itemIndex].emitter.on('update', (element: OrderItemEntity) => this.updateOrderItem(element))
+      this.items[itemIndex].emitter.on('change-status', (element: OrderItemEntity) => {
+        if (!element) return
+        this.emitter.emit('change-status', element)
+      })
+      this.items[itemIndex] = element
+
+    } catch (e) {
+      console.log('error on update item: ', e)
+    }
+  }
+
   public async addOrderToList (id: number) {
     const order = new OrderEntity()
     
     order.emitter.on('init', (element: OrderEntity) => {
+      if (!element) return
+
       order.syncData()
       this.list.push(element)
       this.processingOrder(order)
@@ -193,6 +220,14 @@ export class OrderReposity {
     })
 
     return library
+  }
+
+  public findOrderByHash (hash: string) {
+    return this.list.find((el) => el.hash == hash)
+  }
+
+  public findOrderByID (id: number) {
+    return this.list.find((el) => el.id == id)
   }
 
   private processingOrder (order: OrderEntity) {

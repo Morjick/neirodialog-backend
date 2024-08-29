@@ -2,9 +2,15 @@ import { Body, Delete, Get, JsonController, Params, Patch, Post, QueryParams, Re
 import { CreateNewsContract, UpdatePublishedContract } from "~/data/contracts/news.contracts"
 import { NewsEntity } from "~/data/entities/news/NewsEntity"
 import { IUserModel } from "~/data/entities/UserEntity"
-import { GlobalReposities, IGlobalReposisies } from "~/data/reposityes"
+import { GlobalReposities, IGlobalReposisies, Reposity } from "~/data/reposityes"
 import { AdminMiddleware } from "~/middleware/admin.middleware"
 import { IsAuthMiddleware } from "~/middleware/auth.middleware"
+
+interface IOtherNewsItem {
+  title: string
+  description?: string
+  items: NewsEntity[]
+}
 
 @JsonController('/news')
 export class NewsController {
@@ -38,7 +44,7 @@ export class NewsController {
     const user: IUserModel | null = request.user
     const slug = params.slug
 
-    const news = this.reposities.news.getNews(slug)
+    const news = Reposity.news.getNews(slug)
 
     const isHavePermissionsForRole = user?.role === 'ADMIN' || user?.role === 'ROOT'
 
@@ -48,13 +54,29 @@ export class NewsController {
       error: 'NotFound',
     }
 
-    news.incrementWatches()
+    Reposity.news.incrementWatches(news.slug)
+
+    const autorNews = Reposity.news.getNewsFromAutor(news.autorID)
+    const otherNews = Reposity.news.getList({ limit: 10, })
+
+    const other: IOtherNewsItem[] = [
+      {
+        title: news.autor.fullname,
+        description: 'Новости от того же автора',
+        items: autorNews,
+      },
+      {
+        title: 'Больше новостей',
+        items: otherNews,
+      },
+    ]
 
     return {
       status: 200,
       message: 'Новость получены',
       body: {
         news,
+        other,
       }
     }
   }

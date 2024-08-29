@@ -14,7 +14,7 @@ import { AdminMiddleware } from "~/middleware/admin.middleware"
 @JsonController('/specialists')
 export class SpecialistsController {
   @Get('/specialisations')
-  async getSpecialisations (): Promise<IResponse<any>> {
+  async getSpecialisations (): Promise<IResponse> {
     const specialisations = Reposity.specialists.specialistations
 
     return {
@@ -28,7 +28,7 @@ export class SpecialistsController {
 
   @Post('/specialisations')
   @UseBefore(AdminMiddleware)
-  async createSpecialisations (@Body() body: CreateSpecialisationContract, @Req() request): Promise<IResponse<any>> {
+  async createSpecialisations (@Body() body: CreateSpecialisationContract, @Req() request): Promise<IResponse> {
     try {
       const userModel: IUserModel = request.user
       const user = Reposity.users.findByID(userModel.id)
@@ -57,7 +57,7 @@ export class SpecialistsController {
 
   @Patch('/specialisations/:slug')
   @UseBefore(AdminMiddleware)
-  async updateSpecialisation (@Params() params, @Req() request, @Body() body: UpdateSpecialisationContract): Promise<IResponse<any>> {
+  async updateSpecialisation (@Params() params, @Req() request, @Body() body: UpdateSpecialisationContract): Promise<IResponse> {
     try {
       const { slug } = params
 
@@ -96,7 +96,7 @@ export class SpecialistsController {
   }
 
   @Get('/specialists')
-  async getSpecialists (@QueryParams() filters): Promise<IResponse<any>> {
+  async getSpecialists (@QueryParams() filters): Promise<IResponse> {
     try {
       const specialists = Reposity.specialists.getSpecialistList({ filters: filters, limit: filters.limit })
 
@@ -123,7 +123,7 @@ export class SpecialistsController {
 
   @Post('/specialists')
   @UseBefore(AdminMiddleware)
-  async createSpecialist (@Body() body: CreateSpecialistContract, @Req() request): Promise<IResponse<any>> {
+  async createSpecialist (@Body() body: CreateSpecialistContract, @Req() request): Promise<IResponse> {
     try {
       const userModel: IUserModel = request.user
       const user = Reposity.users.findByID(userModel.id)
@@ -171,7 +171,7 @@ export class SpecialistsController {
 
   @Patch('/specialists/:id')
   @UseBefore(AdminMiddleware)
-  async updateSpecialist (@Req() request, @Body() body: UpdateSpecialistContract, @Params() params): Promise<IResponse<any>> {
+  async updateSpecialist (@Req() request, @Body() body: UpdateSpecialistContract, @Params() params): Promise<IResponse> {
     try {
       const { id } = params.id
 
@@ -210,6 +210,42 @@ export class SpecialistsController {
           type: 'Unexepted',
           message: new Error(error).message
         }
+      }
+    }
+  }
+
+  @Get('/check-specialist/:userID')
+  async checkSpecialist (@Params() params): Promise<IResponse> {
+    const userID = Number(params.userID)
+
+    if (!userID || !Number.isInteger(userID)) return {
+      status: 301,
+      message: 'Не удалось установить userID',
+      exeption: {
+        type: 'Invalid',
+        message: 'userID is not number'
+      }
+    }
+
+    const user = Reposity.users.findByID(userID)
+
+    if (!user) return {
+      status: 404,
+      message: 'Пользователь не найден',
+      exeption: {
+        type: 'NotFound',
+        message: 'User not found'
+      }
+    }
+
+    const specialist = Reposity.specialists.getSpecialistByUserID(userID)
+
+    return {
+      status: 200,
+      message: 'Пользователь был проверен',
+      body: {
+        isSpecialist: !!specialist,
+        specialist: specialist,
       }
     }
   }

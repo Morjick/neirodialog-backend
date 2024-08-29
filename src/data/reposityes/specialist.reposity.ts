@@ -85,6 +85,10 @@ export class SpecialistReposity {
     return this.list.find((el) => el.id == id)
   }
 
+  public getSpecialistByUserID (userID: number) {
+    return this.list.find((el) => el.userID == userID)
+  }
+
   public getSpecialistList (options?: IGetSpecialistOptions): SpecialistEntity[] {
     const filters = options?.filters || {
       search: '',

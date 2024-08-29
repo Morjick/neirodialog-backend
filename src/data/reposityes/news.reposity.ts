@@ -28,7 +28,7 @@ export class NewsReposity {
     await Promise.all(
       news.map(async (el) => {
         const item = new NewsEntity()
-        item.findByID(el.dataValues.id)
+        await item.findByID(el.dataValues.id)
   
         this.list.push(item)
       })
@@ -73,8 +73,8 @@ export class NewsReposity {
         return news
       })
       .sort((prev, el) => {
-        if (prev.id < el.id) return -1
-        if (prev.id > el.id) return +1
+        if (prev.whatches < el.whatches) return -1
+        if (prev.whatches > el.whatches) return +1
 
         return 0
       })
@@ -91,11 +91,19 @@ export class NewsReposity {
     return this.list.find((item) => item.slug === slug)
   }
 
+  getNewsFromAutor (autorID: number) {
+    return this.list.filter((el) => el.autorID == autorID && el.published)
+  }
+
   async delete (id: number) {
     const newsIndex = this.list.findIndex((el) => el.id == id)
     this.list[newsIndex] = null
     this.list = this.list.filter(el => Boolean(el))
 
     return await NewsEntity.delete(id)
+  }
+
+  public incrementWatches (slug: string) {
+    this.list.find((el) => el.slug == slug).incrementWatches()
   }
 }

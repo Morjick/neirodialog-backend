@@ -24,6 +24,9 @@ export interface ICreateDiller {
   autorID: number
   social?: IDillerSocial
   documentsID?: number[]
+  avatar?: string
+  managersID?: number[]
+  adminsID?: number[]
 }
 
 export type TDillerUserRole = 'MANAGER' | 'ADMIN' | 'DIRECTOR'
@@ -54,17 +57,18 @@ export interface IDillerSocial {
 }
 
 export class DillerEntity {
+  public id: number
   public name: string
   public slug: string
   public email: string
-  public id: number
+  public description: string
+  public body: string
+  public avatar: string
   public productsID: number[] = []
   public products: IProductModel[]
-  public description: string
   public social: IDillerSocial
   public documentsID: number[]
   public documents: IDocumentModel[]
-  public body: string
 
   private directorID: number
   private director: IUserOpenData
@@ -80,6 +84,9 @@ export class DillerEntity {
 
   constructor () {
     this.emitter = new EventEmitter()
+
+    this.adminsID = []
+    this.managersID = []
   }
 
   async create (data: ICreateDiller): Promise<IResponse> {
@@ -131,6 +138,9 @@ export class DillerEntity {
       this.social = data.social
       this.body = data.body || ''
       this.documentsID = data.documentsID || []
+      this.avatar = data.avatar
+      this.managersID = data.managersID
+      this.adminsID = data.adminsID
 
       const diller = await DillerModel.create({
         name: this.name,
@@ -144,15 +154,19 @@ export class DillerEntity {
         description: this.description,
         social: JSON.stringify(this.social),
         body: this.body,
+        avatar: this.avatar,
       })
 
       await this.findCommand()
       await this.getDocuments()
 
       this.command.forEach(async (user) => {
+        console.log(user)
         const response = await Reposity.users.updateUserRole('DILLER', admin, user.id)
 
-        if (response.status !== 200 && response.status !== 201) throw new Error(response.error)
+        if (response.status !== 200 && response.status !== 201) {
+          return
+        }
       })
 
       return {
@@ -226,8 +240,8 @@ export class DillerEntity {
     this.email = diller.email
     this.slug = diller.slug
     this.productsID = diller.productsID || []
-    this.availableProductsCount = diller.availableProductsCount
-    this.availableCommandLength = diller.availableCommandLength
+    this.availableProductsCount = diller.availableProductsCount || 10
+    this.availableCommandLength = diller.availableCommandLength || 10
     this.directorID = diller.directorID
     this.productTypePermission = diller.productTypePermission
     this.adminsID = diller.adminsID || []
@@ -236,6 +250,9 @@ export class DillerEntity {
     this.id = diller.id
     this.social = JSON.parse(diller.social)
     this.body = diller.body
+    this.avatar = diller.avatar
+    this.adminsID = diller.adminsID
+    this.managersID = diller.managersID
 
     const User = new UserEntity({ userID: this.directorID })
     this.director = await User.getAutor()
@@ -276,7 +293,7 @@ export class DillerEntity {
     this.productsID = Array.isArray(this.productsID) ? [...this.productsID, productID] : [productID]
   }
 
-  public async updateParticipant (body: IAddParticipant, userData: IUserOpenData): Promise<IResponse<any>> {
+  public async updateParticipant (body: IAddParticipant, userData: IUserOpenData): Promise<IResponse> {
     try {
       if (body.role == 'DIRECTOR') return {
         status: 301,
@@ -382,21 +399,56 @@ export class DillerEntity {
     }
   }
 
+  public static async delete (dillerID: number): Promise<IResponse> {
+    try {
+      const isDiller = await DillerModel.findByPk(dillerID)
+
+      if (!isDiller) return {
+        status: 404,
+        message: 'Диллер с таким ID не найден',
+        exeption: { type: 'NotFound', message: `Diller with ID=${dillerID} not found` }
+      }
+
+      await DillerModel.destroy({ where: { id: dillerID } })
+
+      return {
+        status: 204,
+        message: 'Диллер был удалён',
+      }
+    } catch (e) {
+      const error = new Error(e)
+      return {
+        status: 501,
+        message: 'Не удалось удалить диллера',
+        error: error,
+        exeption: {
+          type: 'Unexepted',
+          message: error.message
+        }
+      }
+    }
+  }
+
   private async findCommand () {
     const comand: IDillerUser[] = []
 
-    this.adminsID.forEach(async (id) => {
-      const user = await Reposity.users.findByID(id)?.getAutor()
-      if (!user) return
+    const adminsID = this.adminsID || []
+    const managersID = this.managersID || []
 
-      this.command.push({
-        ...user,
-        role: 'ADMIN',
-        permissions: Permissions.getDillerPermissions('ADMIN')
-      })
+    adminsID.forEach(async (id) => {
+      try {
+        const user = await Reposity.users.findByID(id).getAutor()
+        if (!user) return
+  
+        this.command.push({
+          ...user,
+          role: 'ADMIN',
+          permissions: Permissions.getDillerPermissions('ADMIN')
+        })
+      } catch {}
     })
 
-    this.managersID.forEach(async (id) => {
+    managersID.forEach(async (id) => {
       const user = await Reposity.users.findByID(id)?.getAutor()
       if (!user) return
 

@@ -16,7 +16,7 @@ interface ICreateOrderItemResponse {
   item: IOrderItemModel
 }
 
-type TAction = 'init' | 'update'
+type TAction = 'init' | 'update' | 'change-status'
 
 export class OrderItemEntity {
   public id: number
@@ -27,6 +27,7 @@ export class OrderItemEntity {
   public count: number
   public hash: string
   public date: string
+  public orderID: number
 
   public emitter = null
 
@@ -34,8 +35,6 @@ export class OrderItemEntity {
 
   constructor () {
     this.emitter = new EventEmitter()
-
-    this.emitter
   }
 
   public async findByID (id: number): Promise<IResponse<any>> {
@@ -102,6 +101,12 @@ export class OrderItemEntity {
     this.emit('update', this)
 
     OrderItem.update({ status: this.status }, { where: { id: this.id } })
+
+    this.emit('change-status', this)
+  }
+
+  public setOrderID (orderID: number) {
+    this.orderID = orderID
   }
 
   public static async create (data: ICreateOrderItem): Promise<IResponse<ICreateOrderItemResponse>> {

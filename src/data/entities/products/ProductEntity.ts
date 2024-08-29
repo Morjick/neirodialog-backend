@@ -76,6 +76,8 @@ export class ProductEntity {
 
   constructor () {
     this.emitter = new EventEmitter()
+
+    this.tags = []
   }
 
   async findByID (productID: number) {
@@ -96,6 +98,7 @@ export class ProductEntity {
     this.features = JSON.parse(product.features)
     this.commentsID = product.commentsID || []
     this.comments = []
+    this.tags = product.tags || []
 
     this.documentsID = product.documentsID || []
     this.documents = await Promise.all(

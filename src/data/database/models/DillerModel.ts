@@ -61,6 +61,9 @@ export class DillerModel extends Model {
   availableProductsCount: number
 
   @Column({ type: DataType.INTEGER })
+  availableCommandLength: number
+
+  @Column({ type: DataType.INTEGER })
   autorID: number
 
   @ForeignKey(() => UserModel)

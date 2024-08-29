@@ -119,7 +119,7 @@ export class UserEntity {
       return {
         firstname: this.user.firstname,
         lastname: this.user.lastname,
-        fullname: `${this.user.firstname} ${this.user.lastname}`,
+        fullname: `${this.user.firstname} ${this.getFullName()}`,
         id: this.user.id,
         avatar: this.user.avatar,
         hash: this.user.hash
